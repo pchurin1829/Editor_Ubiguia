@@ -12,3 +12,6 @@ backup_patch_chatgpt/
 Docs/Entregas Chat/
 *.zip
 Editor_UBIGUIA.spec
+payload/
+README.txt
+instalar_ia.bat
