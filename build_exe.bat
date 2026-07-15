@@ -1,28 +1,10 @@
 @echo off
-echo ==========================================
-echo   Editor UBIGUIA - Generar EXE
-echo ==========================================
-echo.
-
-python --version >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Python no esta instalado o no esta en PATH.
-    pause
-    exit /b 1
-)
-
-python -m pip show pyinstaller >nul 2>&1
-if errorlevel 1 (
-    echo Instalando PyInstaller...
-    python -m pip install pyinstaller
-)
-
-echo.
-echo Generando EXE...
-python -m PyInstaller --onefile --windowed --name Editor_UBIGUIA src\main.py
-
-echo.
-echo Listo. El EXE queda en:
-echo dist\Editor_UBIGUIA.exe
-echo.
+setlocal
+cd /d "%~dp0"
+python --version >nul 2>&1 || (echo Python no esta instalado.& pause & exit /b 1)
+python -m pip show pyinstaller >nul 2>&1 || python -m pip install pyinstaller
+if exist build rmdir /s /q build
+if exist dist rmdir /s /q dist
+if exist Editor_UBIGUIA.spec del /q Editor_UBIGUIA.spec
+python -m PyInstaller --noconfirm --clean --onefile --windowed --name Editor_UBIGUIA --add-data "templates;templates" src\main.py
 pause

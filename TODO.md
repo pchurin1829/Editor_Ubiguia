@@ -1,5 +1,3 @@
 # TODO
 
-## Próxima entrega
-
-- Exportación ZIP con MANIFIESTO.json.
+Traducción automática y voz quedan fuera del MVP y requieren proveedor/API.

@@ -4,10 +4,7 @@
     "title": "{{POI_NAME}}",
     "summary": "",
     "content_markdown": "texto.md",
-    "main_audio": "",
-    "audio_playlist": [],
-    "images": [],
-    "qr": [],
+    "main_audio": "audio/audio.mp3",
     "tags": [],
     "updated_at": "{{UPDATED_AT}}",
     "version": 1

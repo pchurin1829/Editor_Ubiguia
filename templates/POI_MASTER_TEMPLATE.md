@@ -4,13 +4,13 @@
 
 ## 1. Identificación
 
-Nombre:
+Nombre: {{POI_NAME}}
 Ciudad: {{CITY}}
 Provincia: {{PROVINCE}}
 País: {{COUNTRY}}
 Categoría: {{CATEGORY}}
 
-## 2. Descripción General
+## 2. Descripción general
 
 ## 3. Historia
 

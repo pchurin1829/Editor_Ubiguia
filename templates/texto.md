@@ -1,19 +1,13 @@
 # {{POI_NAME}}
 
-**Ciudad:** {{CITY}}  
-**Provincia:** {{PROVINCE}}  
-**País:** {{COUNTRY}}
-
 ## Resumen
 
-## Historia / contexto
+## Historia y contexto
 
-## Cómo llegar
+## Qué observar
 
-## Horarios
+## Curiosidades
 
-## Entradas / precios
+## Información útil
 
-## Tips
-
-## Créditos / fuentes
+## Créditos y fuentes
