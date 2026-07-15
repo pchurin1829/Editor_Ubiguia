@@ -8,3 +8,7 @@ Thumbs.db
 Desktop.ini
 config.local.json
 export/
+backup_patch_chatgpt/
+Docs/Entregas Chat/
+*.zip
+Editor_UBIGUIA.spec
