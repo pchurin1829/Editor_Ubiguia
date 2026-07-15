@@ -1,0 +1,16 @@
+{
+    "poi_id": "{{POI_ID}}",
+    "poi_order": "{{POI_ORDER}}",
+    "poi_name": "{{POI_NAME}}",
+    "tier": "",
+    "category": "{{CATEGORY}}",
+    "country": "{{COUNTRY}}",
+    "province": "{{PROVINCE}}",
+    "city": "{{CITY}}",
+    "country_code": "",
+    "country_slug": "{{COUNTRY_SLUG}}",
+    "province_slug": "{{PROVINCE_SLUG}}",
+    "city_slug": "{{CITY_SLUG}}",
+    "lat": "",
+    "lng": ""
+}

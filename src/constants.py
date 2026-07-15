@@ -1,0 +1,22 @@
+APP_NAME = "Editor UBIGUIA"
+APP_VERSION = "2.3"
+
+CONFIG_FILE = "config.json"
+
+LANGUAGES = ["ESPAÑOL", "INGLES", "PORTUGUES"]
+BROKEN_LANGUAGE_NAMES = {
+    "ESPA�OL": "ESPAÑOL",
+    "ESPANOL": "ESPAÑOL"
+}
+LANGUAGE_FOLDERS = ["audio", "imagenes", "qr"]
+
+TEXT_FILE = "texto.md"
+META_FILE = "meta.json"
+POI_JSON = "poi.json"
+POI_MASTER_FILE = "POI_MASTER.md"
+OLD_POI_MASTER_PREFIX = "POI_MASTER-"
+
+POI_MASTER_TEMPLATE = "POI_MASTER_TEMPLATE.md"
+TEXT_TEMPLATE = "texto.md"
+META_TEMPLATE = "meta.json"
+POI_JSON_TEMPLATE = "poi.json"
