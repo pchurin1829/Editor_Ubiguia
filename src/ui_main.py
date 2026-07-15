@@ -221,7 +221,7 @@ class EditorUBIGUIA(tk.Tk):
         en_ok = nonempty_text(path / "INGLES" / "texto.md")
         pt_ok = nonempty_text(path / "PORTUGUES" / "texto.md")
 
-        images = count_files(path / SHARED_IMAGES_FOLDER, {".jpg", ".jpeg", ".png", ".webp"})
+        images = count_files(path / SHARED_IMAGES_FOLDER, {".jpg", ".jpeg", ".jtif", ".png", ".webp"})
         audio_es = count_files(path / "ESPAÑOL" / AUDIO_FOLDER, {".mp3", ".wav", ".m4a"})
         audio_en = count_files(path / "INGLES" / AUDIO_FOLDER, {".mp3", ".wav", ".m4a"})
         audio_pt = count_files(path / "PORTUGUES" / AUDIO_FOLDER, {".mp3", ".wav", ".m4a"})
@@ -338,7 +338,7 @@ class EditorUBIGUIA(tk.Tk):
             paths
         )
 
-        images = sum(count_files(p / SHARED_IMAGES_FOLDER, {".jpg", ".jpeg", ".png", ".webp"}) for p in paths)
+        images = sum(count_files(p / SHARED_IMAGES_FOLDER, {".jpg", ".jpeg", ".png",".jtif", ".webp"}) for p in paths)
         audios = sum(
             count_files(p / lang / AUDIO_FOLDER, {".mp3", ".wav", ".m4a"})
             for p in paths for lang in ["ESPAÑOL", "INGLES", "PORTUGUES"]

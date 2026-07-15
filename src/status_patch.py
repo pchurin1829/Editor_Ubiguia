@@ -1,7 +1,15 @@
 from constants import POI_MASTER_FILE, SHARED_IMAGES_FOLDER, AUDIO_FOLDER
 from content_status import has_real_text, count_media
 
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+IMAGE_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".jfif",
+    ".jif",
+    ".gif",
+}
 AUDIO_EXTENSIONS = {".mp3", ".wav", ".m4a"}
 
 def apply_status_patch(EditorClass):

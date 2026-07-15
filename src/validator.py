@@ -5,7 +5,15 @@ from constants import (
 )
 from content_status import has_real_text, has_valid_json, count_media
 
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+IMAGE_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".jfif",
+    ".jif",
+    ".gif",
+}
 AUDIO_EXTENSIONS = {".mp3", ".wav", ".m4a"}
 
 def validate_poi(poi_dir: Path) -> list[str]:
