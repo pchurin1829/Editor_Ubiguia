@@ -1,0 +1,222 @@
+from pathlib import Path
+import re
+import webbrowser
+
+MARKERS = {
+    "TEXT_ES": ("<<<TEXT_ES>>>", "<<<END_TEXT_ES>>>"),
+    "TEXT_EN": ("<<<TEXT_EN>>>", "<<<END_TEXT_EN>>>"),
+    "TEXT_PT": ("<<<TEXT_PT>>>", "<<<END_TEXT_PT>>>"),
+    "AUDIO_ES": ("<<<AUDIO_ES>>>", "<<<END_AUDIO_ES>>>"),
+    "AUDIO_EN": ("<<<AUDIO_EN>>>", "<<<END_AUDIO_EN>>>"),
+    "AUDIO_PT": ("<<<AUDIO_PT>>>", "<<<END_AUDIO_PT>>>"),
+}
+
+def read_text(path: Path) -> str:
+    if not path.exists() or not path.is_file():
+        return ""
+    for encoding in ("utf-8", "utf-8-sig", "cp1252", "latin-1"):
+        try:
+            return path.read_text(encoding=encoding)
+        except UnicodeDecodeError:
+            continue
+        except Exception:
+            return ""
+    return path.read_text(encoding="utf-8", errors="replace")
+
+def write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content.strip() + "\n", encoding="utf-8", newline="\n")
+
+def poi_name(poi_dir: Path) -> str:
+    return poi_dir.name.split("-", 1)[-1].strip()
+
+def common_rules() -> str:
+    return """REGLAS EDITORIALES UBIGUIA
+
+Antes de redactar, identificá automáticamente la naturaleza del POI y adaptá el enfoque del artículo.
+
+- No inventes datos, fechas, autores, horarios, precios, direcciones ni enlaces.
+- Si un dato no está confirmado, redactalo prudentemente o indicá que requiere verificación.
+- Conservá nombres propios, instituciones, obras, etapas históricas y fuentes.
+- No escribas como Wikipedia, folleto turístico ni manual escolar.
+- Escribí como un excelente artículo de divulgación histórica y cultural para una persona que recorrerá físicamente el lugar.
+- Explicá primero qué es el lugar, para qué fue creado originalmente, cuándo, quiénes impulsaron la iniciativa y qué necesidad buscaba resolver.
+- Desarrollá el contexto histórico, el proceso de construcción o formación, y los protagonistas confirmados.
+- Narrá cronológicamente los cambios de uso, reformas, abandonos, recuperaciones y restauraciones, con sus causas y fechas verificables.
+- Guiá la mirada del visitante: qué observar, dónde mirar y por qué ese detalle importa.
+- Incluí curiosidades, anécdotas documentadas y datos poco conocidos.
+- Si existen leyendas, tradiciones orales, interpretaciones sobre logias, masonería, túneles, símbolos u otras versiones no oficiales, incorporalas únicamente como versiones no comprobadas y diferenciándolas claramente de los hechos documentados.
+- Explicá por qué el lugar sigue siendo importante para la identidad de la ciudad.
+- Usá español neutro, tono narrativo, párrafos claros y sin lenguaje publicitario.
+- Evitá repeticiones, exageraciones, emojis y frases comerciales.
+- Priorizá profundidad, precisión histórica y claridad narrativa.
+- Utilizá una extensión amplia, cercana al máximo razonable de una única respuesta, sin comprometer la coherencia.
+- Devolvé solamente los bloques solicitados, con los marcadores exactos.
+"""
+
+def build_spanish_prompt(poi_dir: Path) -> str:
+    master = read_text(poi_dir / "POI_MASTER.md").strip()
+    current_es = read_text(poi_dir / "ESPAÑOL" / "texto.md").strip()
+    return f"""Generá la versión española definitiva de este POI para UBIGUIA.
+
+{common_rules()}
+
+POI
+----------------
+{poi_name(poi_dir)}
+
+FICHA DEL POI
+----------------
+{master or '[La ficha está vacía. Trabajá únicamente con la información disponible y no inventes.]'}
+
+TEXTO ESPAÑOL ACTUAL
+----------------
+{current_es or '[Todavía no hay texto español.]'}
+
+ESTRUCTURA OBLIGATORIA DEL ARTÍCULO
+----------------
+1. ¿Qué es este lugar?
+2. ¿Para qué fue construido o creado originalmente?
+3. Contexto histórico, político, urbano, social o natural, según corresponda.
+4. Historia narrada cronológicamente.
+5. Protagonistas, autoridades, arquitectos, ingenieros, artistas, empresas o instituciones vinculadas.
+6. Transformaciones, cambios de uso, reformas, abandonos y restauraciones.
+7. Qué observar durante la visita.
+8. Lo que casi nadie mira.
+9. Curiosidades y datos poco conocidos.
+10. Versiones no oficiales, leyendas o hipótesis, claramente diferenciadas.
+11. Importancia actual e identidad de la ciudad.
+12. Información práctica, sólo cuando sea verificable.
+13. Fuentes principales utilizadas.
+
+FORMATO EXACTO DE RESPUESTA
+
+<<<TEXT_ES>>>
+Artículo español completo, revisado y listo para publicar en Markdown.
+<<<END_TEXT_ES>>>
+"""
+
+def build_translation_prompt(poi_dir: Path) -> str:
+    spanish = read_text(poi_dir / "ESPAÑOL" / "texto.md").strip()
+    if len(spanish) < 100:
+        raise ValueError("El Texto ES todavía no está completo. Genere e importe primero el español.")
+    return f"""Traducí el siguiente contenido turístico de UBIGUIA.
+
+REGLAS
+- Traducí todo el contenido, sin resumirlo.
+- No agregues ni elimines información.
+- Conservá Markdown, nombres propios, fechas, obras, instituciones, enlaces y fuentes.
+- Inglés internacional natural.
+- Portugués de Brasil natural.
+- Devolvé solamente los dos bloques con los marcadores exactos.
+
+POI
+----------------
+{poi_name(poi_dir)}
+
+TEXTO ESPAÑOL APROBADO
+----------------
+{spanish}
+
+FORMATO EXACTO DE RESPUESTA
+
+<<<TEXT_EN>>>
+Traducción completa al inglés en Markdown.
+<<<END_TEXT_EN>>>
+
+<<<TEXT_PT>>>
+Traducción completa al portugués de Brasil en Markdown.
+<<<END_TEXT_PT>>>
+"""
+
+def build_audio_prompt(poi_dir: Path) -> str:
+    es = read_text(poi_dir / "ESPAÑOL" / "texto.md").strip()
+    en = read_text(poi_dir / "INGLES" / "texto.md").strip()
+    pt = read_text(poi_dir / "PORTUGUES" / "texto.md").strip()
+    missing = []
+    if len(es) < 100: missing.append("Texto ES")
+    if len(en) < 100: missing.append("Texto EN")
+    if len(pt) < 100: missing.append("Texto PT")
+    if missing:
+        raise ValueError("Falta contenido antes de generar los guiones: " + ", ".join(missing))
+    return f"""Generá los tres guiones de audio de este POI de UBIGUIA.
+
+REGLAS
+- Cada guion debe conservar los datos del texto correspondiente.
+- Adaptá el contenido para escucha: lenguaje fluido, natural y agradable.
+- No uses Markdown, títulos, enlaces escritos ni listas técnicas.
+- Guiá la mirada del visitante con naturalidad.
+- No inventes ni agregues información.
+- Mantené una duración razonable y evitá repeticiones.
+- Devolvé solamente los tres bloques con los marcadores exactos.
+
+POI
+----------------
+{poi_name(poi_dir)}
+
+TEXTO ESPAÑOL
+----------------
+{es}
+
+TEXTO INGLÉS
+----------------
+{en}
+
+TEXTO PORTUGUÉS
+----------------
+{pt}
+
+FORMATO EXACTO DE RESPUESTA
+
+<<<AUDIO_ES>>>
+Guion natural para narración en español.
+<<<END_AUDIO_ES>>>
+
+<<<AUDIO_EN>>>
+Guion natural para narración en inglés.
+<<<END_AUDIO_EN>>>
+
+<<<AUDIO_PT>>>
+Guion natural para narración en portugués de Brasil.
+<<<END_AUDIO_PT>>>
+"""
+
+def extract_available_sections(response_text: str) -> dict[str, str]:
+    result: dict[str, str] = {}
+    for key, (start, end) in MARKERS.items():
+        pattern = re.escape(start) + r"\s*(.*?)\s*" + re.escape(end)
+        match = re.search(pattern, response_text, flags=re.DOTALL)
+        if not match:
+            continue
+        content = match.group(1).strip()
+        if len(content) < 40:
+            raise ValueError(f"El bloque {key} está vacío o incompleto.")
+        result[key] = content
+    if not result:
+        raise ValueError("No se encontró ningún bloque válido. Copie la respuesta completa de ChatGPT, incluidos los marcadores <<<...>>>.")
+    return result
+
+def save_sections(poi_dir: Path, sections: dict[str, str]) -> list[str]:
+    destinations = {
+        "TEXT_ES": poi_dir / "ESPAÑOL" / "texto.md",
+        "TEXT_EN": poi_dir / "INGLES" / "texto.md",
+        "TEXT_PT": poi_dir / "PORTUGUES" / "texto.md",
+        "AUDIO_ES": poi_dir / "ESPAÑOL" / "audio" / "guion_audio.md",
+        "AUDIO_EN": poi_dir / "INGLES" / "audio" / "guion_audio.md",
+        "AUDIO_PT": poi_dir / "PORTUGUES" / "audio" / "guion_audio.md",
+    }
+    labels = {
+        "TEXT_ES": "Texto ES", "TEXT_EN": "Texto EN", "TEXT_PT": "Texto PT",
+        "AUDIO_ES": "Guion de audio ES", "AUDIO_EN": "Guion de audio EN", "AUDIO_PT": "Guion de audio PT",
+    }
+    saved = []
+    for key, content in sections.items():
+        destination = destinations.get(key)
+        if destination is None:
+            continue
+        write_text(destination, content)
+        saved.append(labels[key])
+    return saved
+
+def open_chatgpt() -> None:
+    webbrowser.open("https://chatgpt.com/")
