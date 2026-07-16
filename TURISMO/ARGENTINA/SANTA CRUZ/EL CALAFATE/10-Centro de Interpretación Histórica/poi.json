@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "c68aafc3-7bf5-5792-afa1-853d65850a20",
+    "poi_order":  "10",
+    "poi_name":  "Centro de Interpretación Histórica",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "SANTA CRUZ",
+    "city":  "EL CALAFATE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-cruz",
+    "city_slug":  "el-calafate",
+    "lat":  "-50.3312092",
+    "lng":  "-72.2651860"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "331bb50d-fab0-5877-b46e-46188141aa63",
+    "poi_order":  "14",
+    "poi_name":  "Playas Costa Sur",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "POSADAS",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "posadas",
+    "lat":  "-27.4186840",
+    "lng":  "-55.8790755"
+}

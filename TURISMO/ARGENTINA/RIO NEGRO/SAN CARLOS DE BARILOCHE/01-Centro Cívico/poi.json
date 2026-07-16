@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "d7a55f9c-3358-58dd-a5dc-b6798a0e475c",
+    "poi_order":  "01",
+    "poi_name":  "Centro Cívico",
+    "tier":  "top",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.1337056",
+    "lng":  "-71.3103263"
+}

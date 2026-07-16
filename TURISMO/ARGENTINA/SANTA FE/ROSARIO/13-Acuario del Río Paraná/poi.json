@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "b3cccb92-dcd1-57ea-a239-cb6675aaf9fe",
+    "poi_order":  "13",
+    "poi_name":  "Acuario del Río Paraná",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.9112234",
+    "lng":  "-60.6750701"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "239d35fe-58ff-550b-97a9-8fcf2e02bf54",
+    "poi_order":  "08",
+    "poi_name":  "Parque San Martín (Jujuy)",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "JUJUY",
+    "city":  "SAN SALVADOR DE JUJUY",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "jujuy",
+    "city_slug":  "san-salvador-de-jujuy",
+    "lat":  "-24.1831332",
+    "lng":  "-65.3147350"
+}

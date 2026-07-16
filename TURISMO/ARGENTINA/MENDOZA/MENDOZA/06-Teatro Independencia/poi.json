@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "cc8d1e2e-0088-54d5-b496-1a6304b1a8a6",
+    "poi_order":  "06",
+    "poi_name":  "Teatro Independencia",
+    "tier":  "secondary",
+    "category":  "Teatro/Espectáculos",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-32.8885032",
+    "lng":  "-68.8460605"
+}

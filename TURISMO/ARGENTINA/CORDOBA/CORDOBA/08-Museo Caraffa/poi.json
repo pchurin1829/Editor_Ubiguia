@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "25fa72a2-621b-5f28-9c15-4a247ca49e7d",
+    "poi_order":  "08",
+    "poi_name":  "Museo Caraffa",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "CORDOBA",
+    "city":  "CORDOBA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "cordoba",
+    "city_slug":  "cordoba",
+    "lat":  "-31.4284558",
+    "lng":  "-64.1836440"
+}

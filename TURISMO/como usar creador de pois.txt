@@ -1,0 +1,46 @@
+Sí, en esa ubicación está perfecto.
+
+Viendo tu estructura, la **Carpeta BASE** debe ser la carpeta donde empieza el árbol de países.
+
+En tu caso sería:
+
+```text
+I:\MIS PROYECTOS\PROYECTOS ARIEL\Proyecto UBIGUIA\TURISMO
+```
+
+No "ARGENTINA".
+
+Porque el programa crea:
+
+```text
+TURISMO
+    └── ARGENTINA
+          └── BUENOS AIRES
+                └── LA PLATA
+                      └── 02-Plaza Moreno
+```
+
+Entonces los campos quedarían así:
+
+| Campo        | Valor                                                       |
+| ------------ | ----------------------------------------------------------- |
+| Carpeta BASE | `I:\MIS PROYECTOS\PROYECTOS ARIEL\Proyecto UBIGUIA\TURISMO` |
+| País         | `ARGENTINA`                                                 |
+| Provincia    | `BUENOS AIRES`                                              |
+| Ciudad       | `LA PLATA`                                                  |
+| Número       | `02`                                                        |
+| Nombre       | `Plaza Moreno`                                              |
+
+Al presionar **Crear POI** debería generarte:
+
+```text
+TURISMO
+└── ARGENTINA
+    └── BUENOS AIRES
+        └── LA PLATA
+            └── 02-Plaza Moreno
+```
+
+---
+
+

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "722448b0-3612-5cdf-a0f8-ef7cea320190",
+    "poi_order":  "16",
+    "poi_name":  "Parque Alem",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-33.0819031",
+    "lng":  "-60.5865947"
+}

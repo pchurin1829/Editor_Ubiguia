@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a4e59d7a-fb06-5e37-a198-aaac6dcfd29b",
+    "poi_order":  "07",
+    "poi_name":  "Jardín Botánico Alberto Roth (Posadas)",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "POSADAS",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "posadas",
+    "lat":  "-27.4080504",
+    "lng":  "-55.8962205"
+}

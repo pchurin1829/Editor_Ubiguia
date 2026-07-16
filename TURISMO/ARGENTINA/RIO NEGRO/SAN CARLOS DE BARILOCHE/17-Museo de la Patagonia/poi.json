@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "15e56a89-b196-52d1-83e7-d05f314cb6b1",
+    "poi_order":  "17",
+    "poi_name":  "Museo de la Patagonia",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.1332503",
+    "lng":  "-71.3094981"
+}

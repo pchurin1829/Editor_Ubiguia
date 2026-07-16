@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a5ed4550-a3a8-5ca8-89d0-cf964484a657",
+    "poi_order":  "19",
+    "poi_name":  "Costanera de Ushuaia",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.8065484",
+    "lng":  "-68.2999488"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "69233489-8eb9-591c-b78e-82219fb08c28",
+    "poi_order":  "09",
+    "poi_name":  "Puente Lavalle",
+    "tier":  "secondary",
+    "category":  "Experiencia/Transporte",
+    "country":  "ARGENTINA",
+    "province":  "JUJUY",
+    "city":  "SAN SALVADOR DE JUJUY",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "jujuy",
+    "city_slug":  "san-salvador-de-jujuy",
+    "lat":  "-24.1894856",
+    "lng":  "-65.3026118"
+}

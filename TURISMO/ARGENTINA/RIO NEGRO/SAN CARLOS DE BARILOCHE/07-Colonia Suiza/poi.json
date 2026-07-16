@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "c3734cc4-f31d-5636-b870-764afdf24017",
+    "poi_order":  "07",
+    "poi_name":  "Colonia Suiza",
+    "tier":  "secondary",
+    "category":  "Teatro/Espectáculos",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.0963261",
+    "lng":  "-71.5045888"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "98857c10-cff8-5f96-8322-77a026e5f9d5",
+    "poi_order":  "02",
+    "poi_name":  "Plaza Moreno",
+    "tier":  "top",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9206722",
+    "lng":  "-57.9561499"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "e8053349-9814-5fdb-bb20-52ed0ecd404b",
+    "poi_order":  "14",
+    "poi_name":  "Playa Bonita",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.1234533",
+    "lng":  "-71.4007649"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "cf686485-466b-5b6a-9750-baa8cf7b3199",
+    "poi_order":  "10",
+    "poi_name":  "Centro Cultural Parque de España",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "",
+    "lng":  ""
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "9ab1022e-7d4b-5cf9-8dd6-8616428d569f",
+    "poi_order":  "04",
+    "poi_name":  "Paseo del Buen Pastor",
+    "tier":  "top",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "CORDOBA",
+    "city":  "CORDOBA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "cordoba",
+    "city_slug":  "cordoba",
+    "lat":  "-31.4240833",
+    "lng":  "-64.1864197"
+}

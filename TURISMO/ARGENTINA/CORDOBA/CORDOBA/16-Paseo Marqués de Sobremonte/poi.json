@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "5d8dde77-0f97-561a-960f-6e8a4d1290fa",
+    "poi_order":  "16",
+    "poi_name":  "Paseo Marqués de Sobremonte",
+    "tier":  "secondary",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "CORDOBA",
+    "city":  "CORDOBA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "cordoba",
+    "city_slug":  "cordoba",
+    "lat":  "-31.4155851",
+    "lng":  "-64.1921295"
+}

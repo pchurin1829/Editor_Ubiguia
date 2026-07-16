@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "17fa3796-e0cd-5997-8707-dea1bb28ce11",
+    "poi_order":  "04",
+    "poi_name":  "Boulevard Oroño",
+    "tier":  "top",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.9654886",
+    "lng":  "-60.6582616"
+}

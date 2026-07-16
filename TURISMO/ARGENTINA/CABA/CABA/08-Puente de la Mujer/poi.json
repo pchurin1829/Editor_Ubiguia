@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "8bd64e5a-3f2a-5c6b-826a-6066b9432270",
+    "poi_order":  "08",
+    "poi_name":  "Puente de la Mujer",
+    "tier":  "secondary",
+    "category":  "Experiencia/Transporte",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6080163",
+    "lng":  "-58.3651290"
+}

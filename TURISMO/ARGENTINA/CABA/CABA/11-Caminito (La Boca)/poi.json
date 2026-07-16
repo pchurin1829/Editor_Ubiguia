@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "aeab29d4-e7e8-526c-a055-aa9a5e7e905c",
+    "poi_order":  "11",
+    "poi_name":  "Caminito (La Boca)",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6393589",
+    "lng":  "-58.3625689"
+}

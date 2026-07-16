@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "8378d42b-6ea8-5177-99a7-0352eb27f7ad",
+    "poi_order":  "10",
+    "poi_name":  "Estadio UNO (Jorge Luis Hirschi)",
+    "tier":  "secondary",
+    "category":  "Deporte",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9119094",
+    "lng":  "-57.9388416"
+}

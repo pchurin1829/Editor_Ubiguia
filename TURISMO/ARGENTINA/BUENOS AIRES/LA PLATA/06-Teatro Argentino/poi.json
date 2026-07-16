@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "7ec8ae22-895e-5e92-8376-d5cdad29eec1",
+    "poi_order":  "06",
+    "poi_name":  "Teatro Argentino",
+    "tier":  "secondary",
+    "category":  "Teatro/Espectáculos",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9181596",
+    "lng":  "-57.9509887"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "061ef0ed-7e48-5ca0-b1e9-ce21bdb573a2",
+    "poi_order":  "10",
+    "poi_name":  "Mercado San Miguel",
+    "tier":  "secondary",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "SALTA",
+    "city":  "SALTA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "salta",
+    "city_slug":  "salta",
+    "lat":  "-24.7925835",
+    "lng":  "-65.4136167"
+}

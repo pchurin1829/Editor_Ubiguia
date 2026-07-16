@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "7578edef-c11d-5744-a912-d2fba00c05a0",
+    "poi_order":  "09",
+    "poi_name":  "Isla de los Inventos",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.9366579",
+    "lng":  "-60.6404240"
+}

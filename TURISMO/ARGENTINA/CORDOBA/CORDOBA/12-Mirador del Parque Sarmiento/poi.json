@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "375d4a2d-04b9-5d04-8c06-1c9ad5a3cf2b",
+    "poi_order":  "12",
+    "poi_name":  "Mirador del Parque Sarmiento",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "CORDOBA",
+    "city":  "CORDOBA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "cordoba",
+    "city_slug":  "cordoba",
+    "lat":  "-31.4259279",
+    "lng":  "-64.1778903"
+}

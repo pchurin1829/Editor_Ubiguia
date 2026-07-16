@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "d371b204-3432-51c4-a40f-6756aade44ab",
+    "poi_order":  "02",
+    "poi_name":  "Teatro Colón",
+    "tier":  "top",
+    "category":  "Teatro/Espectáculos",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6010855",
+    "lng":  "-58.3831869"
+}

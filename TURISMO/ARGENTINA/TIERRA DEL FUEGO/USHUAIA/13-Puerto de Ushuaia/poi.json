@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "862f5454-389e-5a07-94a0-7201fd83a7e1",
+    "poi_order":  "13",
+    "poi_name":  "Puerto de Ushuaia",
+    "tier":  "secondary",
+    "category":  "Experiencia/Transporte",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.8093174",
+    "lng":  "-68.3028724"
+}

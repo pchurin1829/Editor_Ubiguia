@@ -1,0 +1,1 @@
+﻿# Hipódromo de La Plata  **Ciudad:** LA PLATA **Provincia:** BUENOS AIRES **Pa�s:** ARGENTINA  ## Resumen  - (Escrib� aqu� un resumen corto en este idioma)  ## Historia / contexto  - (Texto)  ## C�mo llegar  - (Indicaciones)  ## Horarios  - (Si aplica)  ## Entradas / precios  - (Si aplica)  ## Tips  - (Consejos)  ## Cr�ditos / fuentes  - (Links / referencias)

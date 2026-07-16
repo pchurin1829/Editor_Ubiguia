@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a133dbd0-e035-50b4-a46f-7d53d5909985",
+    "poi_order":  "06",
+    "poi_name":  "Glaciar Martial",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.7858583",
+    "lng":  "-68.4125243"
+}

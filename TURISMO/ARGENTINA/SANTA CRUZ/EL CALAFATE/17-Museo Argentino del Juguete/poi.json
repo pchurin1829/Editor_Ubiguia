@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "efafac2d-d9fd-52f0-9115-545825328ac5",
+    "poi_order":  "17",
+    "poi_name":  "Museo Argentino del Juguete",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "SANTA CRUZ",
+    "city":  "EL CALAFATE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-cruz",
+    "city_slug":  "el-calafate",
+    "lat":  "-50.3384460",
+    "lng":  "-72.2624491"
+}

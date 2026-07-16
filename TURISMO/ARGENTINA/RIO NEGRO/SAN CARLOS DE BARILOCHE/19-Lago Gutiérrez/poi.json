@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "9694ab4f-e42e-5a71-abb3-756f3f3f5a3a",
+    "poi_order":  "19",
+    "poi_name":  "Lago Gutiérrez",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.1795503",
+    "lng":  "-71.3799632"
+}

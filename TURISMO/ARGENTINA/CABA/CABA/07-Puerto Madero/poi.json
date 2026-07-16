@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "848a9aae-aee3-549d-9b9f-546272899762",
+    "poi_order":  "07",
+    "poi_name":  "Puerto Madero",
+    "tier":  "secondary",
+    "category":  "Experiencia/Transporte",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6103764",
+    "lng":  "-58.3622067"
+}

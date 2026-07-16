@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "b9538bf0-78b7-5940-a17f-ae5bf7e8bd05",
+    "poi_order":  "13",
+    "poi_name":  "Sendero Macuco",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "PUERTO IGUAZU",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "puerto-iguazu",
+    "lat":  "-25.6782710",
+    "lng":  "-54.4524755"
+}

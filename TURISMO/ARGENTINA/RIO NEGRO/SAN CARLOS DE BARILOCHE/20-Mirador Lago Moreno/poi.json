@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "ed275e86-a175-5047-b82a-985cc14723d9",
+    "poi_order":  "20",
+    "poi_name":  "Mirador Lago Moreno",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.0555016",
+    "lng":  "-71.5562837"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "b9cb8d40-f42f-5311-87e9-a5c10abd2583",
+    "poi_order":  "09",
+    "poi_name":  "Museo Primeros Pobladores",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "NEUQUEN",
+    "city":  "SAN MARTIN DE LOS ANDES",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "neuquen",
+    "city_slug":  "san-martin-de-los-andes",
+    "lat":  "-40.1567249",
+    "lng":  "-71.3518497"
+}

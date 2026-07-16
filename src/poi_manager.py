@@ -18,16 +18,22 @@ def read_template(name):
 def fill(c,d):
  for k,v in d.items(): c=c.replace("{{"+k+"}}",str(v))
  return c
+def ensure_poi_structure(poi: Path):
+ ensure_dir(poi/SHARED_IMAGES_FOLDER)
+ ensure_dir(poi/SHARED_VIDEOS_FOLDER)
+ for lang in LANGUAGES:
+  ensure_dir(poi/lang)
+  ensure_dir(poi/lang/AUDIO_FOLDER)
 def create_poi(root,country,province,city,number,name,category=""):
  name=name.strip(); poi=city_path(root,country,province,city)/f"{number}-{name}"
  if poi.exists(): raise FileExistsError(f"Ya existe el POI: {poi}")
- ensure_dir(poi/SHARED_IMAGES_FOLDER)
+ ensure_poi_structure(poi)
  pid=str(uuid.uuid5(uuid.NAMESPACE_DNS,f"{country}-{province}-{city}-{name}")); now=datetime.now().isoformat(timespec="seconds")
  data={"POI_ID":pid,"POI_NAME":name,"COUNTRY":country,"PROVINCE":province,"CITY":city,"CATEGORY":category,"UPDATED_AT":now}
  (poi/POI_MASTER_FILE).write_text(fill(read_template(POI_MASTER_TEMPLATE),data),encoding="utf-8")
  (poi/POI_JSON).write_text(json.dumps({"poi_id":pid,"poi_order":number,"poi_name":name,"category":category,"country":country,"province":province,"city":city,"country_slug":slug(country),"province_slug":slug(province),"city_slug":slug(city),"lat":"","lng":""},ensure_ascii=False,indent=4),encoding="utf-8")
  for lang in LANGUAGES:
-  ld=poi/lang; ensure_dir(ld/AUDIO_FOLDER); x=data.copy(); x["LANG"]=LANG_CODES[lang]
+  ld=poi/lang; x=data.copy(); x["LANG"]=LANG_CODES[lang]
   (ld/TEXT_FILE).write_text(fill(read_template(TEXT_TEMPLATE),x),encoding="utf-8")
   try:m=json.loads(fill(read_template(META_TEMPLATE),x))
   except Exception:m={}

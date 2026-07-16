@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "1da58b44-9211-5e5b-8b0b-87a72ccdd250",
+    "poi_order":  "20",
+    "poi_name":  "Playa Varese",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "MAR DEL PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "mar-del-plata",
+    "lat":  "-38.0141764",
+    "lng":  "-57.5304929"
+}

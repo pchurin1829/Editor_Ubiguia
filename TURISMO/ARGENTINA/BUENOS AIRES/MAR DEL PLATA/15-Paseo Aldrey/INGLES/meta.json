@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "6cf07a87-c24e-58d4-bedc-4c78f12a6b82",
+    "lang":  "INGLES",
+    "title":  "Paseo Aldrey",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:33",
+    "version":  1
+}

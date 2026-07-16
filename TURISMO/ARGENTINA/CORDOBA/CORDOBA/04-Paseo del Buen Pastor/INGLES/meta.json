@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "9ab1022e-7d4b-5cf9-8dd6-8616428d569f",
+    "lang":  "INGLES",
+    "title":  "Paseo del Buen Pastor",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:25",
+    "version":  1
+}

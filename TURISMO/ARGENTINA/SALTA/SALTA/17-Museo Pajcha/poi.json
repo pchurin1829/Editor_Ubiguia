@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "117e0cc5-2949-54c7-805a-9ad8836a882e",
+    "poi_order":  "17",
+    "poi_name":  "Museo Pajcha",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "SALTA",
+    "city":  "SALTA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "salta",
+    "city_slug":  "salta",
+    "lat":  "-24.7795728",
+    "lng":  "-65.4128876"
+}

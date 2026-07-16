@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "3d331196-0740-5709-a54a-d4559b87d2d3",
+    "poi_order":  "18",
+    "poi_name":  "Plaza de los Pioneros",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "SANTA CRUZ",
+    "city":  "EL CALAFATE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-cruz",
+    "city_slug":  "el-calafate",
+    "lat":  "-50.3384731",
+    "lng":  "-72.2565326"
+}

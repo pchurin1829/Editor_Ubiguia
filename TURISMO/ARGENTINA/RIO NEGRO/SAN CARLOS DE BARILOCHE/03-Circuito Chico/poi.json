@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "6cc63e2e-c1cd-5eff-b772-49e159183089",
+    "poi_order":  "03",
+    "poi_name":  "Circuito Chico",
+    "tier":  "top",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.0691314",
+    "lng":  "-71.4814693"
+}

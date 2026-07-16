@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a89b71b8-c455-5226-86b1-7e39247fccae",
+    "poi_order":  "05",
+    "poi_name":  "Paseo de los Artesanos (centro)",
+    "tier":  "top",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "JUJUY",
+    "city":  "SAN SALVADOR DE JUJUY",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "jujuy",
+    "city_slug":  "san-salvador-de-jujuy",
+    "lat":  "-24.1834052",
+    "lng":  "-65.2995069"
+}

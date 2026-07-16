@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a0ddcea3-04c7-58f5-bb36-e90b40474bca",
+    "poi_order":  "06",
+    "poi_name":  "Parque Nacional Nahuel Huapi",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.1562048",
+    "lng":  "-71.4178109"
+}

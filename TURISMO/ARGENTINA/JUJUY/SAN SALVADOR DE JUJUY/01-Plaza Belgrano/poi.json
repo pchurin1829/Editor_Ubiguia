@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "44b95e02-1a77-5c9a-a6e7-78977ed0e622",
+    "poi_order":  "01",
+    "poi_name":  "Plaza Belgrano",
+    "tier":  "top",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "JUJUY",
+    "city":  "SAN SALVADOR DE JUJUY",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "jujuy",
+    "city_slug":  "san-salvador-de-jujuy",
+    "lat":  "-24.1857818",
+    "lng":  "-65.2994705"
+}

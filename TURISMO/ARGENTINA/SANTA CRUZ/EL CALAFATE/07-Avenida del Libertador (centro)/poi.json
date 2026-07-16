@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "fdb1b14f-6e9b-5821-86f1-debab4cce15e",
+    "poi_order":  "07",
+    "poi_name":  "Avenida del Libertador (centro)",
+    "tier":  "secondary",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "SANTA CRUZ",
+    "city":  "EL CALAFATE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-cruz",
+    "city_slug":  "el-calafate",
+    "lat":  "-50.3382428",
+    "lng":  "-72.2707580"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "0700e8fd-5c9e-5aab-bb8f-44c8b1341dda",
+    "poi_order":  "07",
+    "poi_name":  "Museo del Área Fundacional",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-32.8797711",
+    "lng":  "-68.8279704"
+}

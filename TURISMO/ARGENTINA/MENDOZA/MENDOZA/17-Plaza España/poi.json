@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "c14a3334-6bc3-59e2-baee-01aa58679529",
+    "poi_order":  "17",
+    "poi_name":  "Plaza España",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-34.6028825",
+    "lng":  "-68.3355682"
+}

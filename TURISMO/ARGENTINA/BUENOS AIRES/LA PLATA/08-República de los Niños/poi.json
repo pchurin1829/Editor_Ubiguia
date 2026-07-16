@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "4d6c018b-77c4-563f-b32c-2f7e0b956ad8",
+    "poi_order":  "08",
+    "poi_name":  "República de los Niños",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.8852199",
+    "lng":  "-58.0192542"
+}

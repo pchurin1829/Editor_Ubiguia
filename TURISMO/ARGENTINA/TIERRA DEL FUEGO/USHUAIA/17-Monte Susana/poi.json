@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a131a52b-eabb-58f7-b4ab-b3a045e0d46a",
+    "poi_order":  "17",
+    "poi_name":  "Monte Susana",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.8322498",
+    "lng":  "-68.4483969"
+}

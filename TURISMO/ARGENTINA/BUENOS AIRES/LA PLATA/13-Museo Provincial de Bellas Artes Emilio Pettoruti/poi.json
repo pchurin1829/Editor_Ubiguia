@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "40388326-2620-5d3c-84bd-84732eef77f3",
+    "poi_order":  "13",
+    "poi_name":  "Museo Provincial de Bellas Artes Emilio Pettoruti",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9137941",
+    "lng":  "-57.9475579"
+}

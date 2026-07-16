@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "67821c80-7f1a-556a-a15d-1f7f402e4fff",
+    "poi_order":  "10",
+    "poi_name":  "Bahía Lapataia",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.8552673",
+    "lng":  "-68.5767460"
+}

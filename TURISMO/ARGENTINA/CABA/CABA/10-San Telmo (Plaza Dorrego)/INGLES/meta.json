@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "1b5c0941-3fe6-529c-a000-e3c6cbc98b3a",
+    "lang":  "INGLES",
+    "title":  "San Telmo (Plaza Dorrego)",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:23",
+    "version":  1
+}

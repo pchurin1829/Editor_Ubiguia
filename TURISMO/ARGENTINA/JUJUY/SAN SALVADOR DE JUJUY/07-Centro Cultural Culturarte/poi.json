@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "2aefdd80-8fa1-584c-8be4-1bc99a008fb4",
+    "poi_order":  "07",
+    "poi_name":  "Centro Cultural Culturarte",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "JUJUY",
+    "city":  "SAN SALVADOR DE JUJUY",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "jujuy",
+    "city_slug":  "san-salvador-de-jujuy",
+    "lat":  "-24.1867743",
+    "lng":  "-65.3001849"
+}

@@ -1,5 +1,6 @@
 from constants import POI_MASTER_FILE, SHARED_IMAGES_FOLDER, AUDIO_FOLDER
 from content_status import has_real_text, count_media
+from poi_manager import ensure_poi_structure
 
 IMAGE_EXTENSIONS = {
     ".jpg",
@@ -20,6 +21,7 @@ def apply_status_patch(EditorClass):
             return
 
         path = self.current_city_path() / names[0]
+        ensure_poi_structure(path)
 
         master_ok = has_real_text(path / POI_MASTER_FILE, 100)
         es_ok = has_real_text(path / "ESPAÑOL" / "texto.md", 100)

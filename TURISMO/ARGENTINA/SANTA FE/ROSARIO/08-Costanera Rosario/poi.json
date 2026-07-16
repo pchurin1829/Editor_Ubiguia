@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "ab58c529-be9d-5f1b-8580-5c334524fe6a",
+    "poi_order":  "08",
+    "poi_name":  "Costanera Rosario",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.9469667",
+    "lng":  "-60.6312853"
+}

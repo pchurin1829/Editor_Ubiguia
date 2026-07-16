@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "6dfb6f03-a889-5e43-88c2-ea28394c52bb",
+    "poi_order":  "15",
+    "poi_name":  "Paseo Costero",
+    "tier":  "secondary",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "SANTA CRUZ",
+    "city":  "EL CALAFATE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-cruz",
+    "city_slug":  "el-calafate",
+    "lat":  "",
+    "lng":  ""
+}

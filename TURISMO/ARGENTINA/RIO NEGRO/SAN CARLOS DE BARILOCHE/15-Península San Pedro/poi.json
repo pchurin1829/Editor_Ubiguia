@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "fe84acd1-84f7-5a86-a2f0-c388a5daadae",
+    "poi_order":  "15",
+    "poi_name":  "Península San Pedro",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.0691769",
+    "lng":  "-71.4442120"
+}

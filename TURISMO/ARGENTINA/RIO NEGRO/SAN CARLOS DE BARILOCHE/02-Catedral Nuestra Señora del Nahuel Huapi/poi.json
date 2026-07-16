@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "30cfaaa6-0a16-5dad-a40d-0c4e8092efcf",
+    "poi_order":  "02",
+    "poi_name":  "Catedral Nuestra Señora del Nahuel Huapi",
+    "tier":  "top",
+    "category":  "Cultura/Religión",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.1328678",
+    "lng":  "-71.3024797"
+}

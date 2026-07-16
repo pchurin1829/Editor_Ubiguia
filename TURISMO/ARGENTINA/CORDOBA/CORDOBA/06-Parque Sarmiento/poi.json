@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "e7364011-d63e-5db2-8414-43db3d74131c",
+    "poi_order":  "06",
+    "poi_name":  "Parque Sarmiento",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "CORDOBA",
+    "city":  "CORDOBA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "cordoba",
+    "city_slug":  "cordoba",
+    "lat":  "-31.4295096",
+    "lng":  "-64.1767382"
+}

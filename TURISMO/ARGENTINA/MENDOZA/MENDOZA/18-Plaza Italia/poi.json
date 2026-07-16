@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "447c7283-67c9-5069-8b01-b5899a4b7871",
+    "poi_order":  "18",
+    "poi_name":  "Plaza Italia",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-32.8918099",
+    "lng":  "-68.8484190"
+}

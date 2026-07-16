@@ -5,11 +5,11 @@ from tkinter.scrolledtext import ScrolledText
 
 from config import load_config, save_config, project_root
 from filesystem import list_dirs, open_folder
-from poi_manager import list_pois, next_poi_number, create_poi, city_path, find_master_file
+from poi_manager import list_pois, next_poi_number, create_poi, city_path, find_master_file, ensure_poi_structure
 from validator import validate_text
 from repair import repair_city
 from zip_export import export_pois
-from constants import APP_NAME, APP_VERSION, POI_MASTER_FILE, SHARED_IMAGES_FOLDER, AUDIO_FOLDER
+from constants import APP_NAME, APP_VERSION, POI_MASTER_FILE, SHARED_IMAGES_FOLDER, SHARED_VIDEOS_FOLDER, AUDIO_FOLDER
 
 def poi_title(folder_name: str) -> str:
     return folder_name.split("-", 1)[1].strip() if "-" in folder_name else folder_name
@@ -120,6 +120,7 @@ class EditorUBIGUIA(tk.Tk):
         ttk.Button(group_content, text="Texto EN", command=lambda:self.edit_text("INGLES")).pack(side="left", padx=3, pady=4)
         ttk.Button(group_content, text="Texto PT", command=lambda:self.edit_text("PORTUGUES")).pack(side="left", padx=3, pady=4)
         ttk.Button(group_content, text="Imágenes", command=self.open_images).pack(side="left", padx=3, pady=4)
+        ttk.Button(group_content, text="Videos", command=self.open_videos).pack(side="left", padx=3, pady=4)
         ttk.Button(group_content, text="Audio ES", command=lambda:self.open_audio("ESPAÑOL")).pack(side="left", padx=3, pady=4)
         ttk.Button(group_content, text="Audio EN", command=lambda:self.open_audio("INGLES")).pack(side="left", padx=3, pady=4)
         ttk.Button(group_content, text="Audio PT", command=lambda:self.open_audio("PORTUGUES")).pack(side="left", padx=3, pady=4)
@@ -203,10 +204,15 @@ class EditorUBIGUIA(tk.Tk):
         if not names:
             messagebox.showwarning("Atención", "Seleccione un POI.")
             return None
-        return self.current_city_path() / names[0]
+        path = self.current_city_path() / names[0]
+        ensure_poi_structure(path)
+        return path
 
     def selected_paths(self):
-        return [self.current_city_path() / n for n in self.selected_names()]
+        paths = [self.current_city_path() / n for n in self.selected_names()]
+        for path in paths:
+            ensure_poi_structure(path)
+        return paths
 
     def update_status(self):
         names = self.selected_names()
@@ -215,6 +221,7 @@ class EditorUBIGUIA(tk.Tk):
             return
 
         path = self.current_city_path() / names[0]
+        ensure_poi_structure(path)
 
         master_ok = nonempty_text(path / POI_MASTER_FILE)
         es_ok = nonempty_text(path / "ESPAÑOL" / "texto.md")
@@ -296,6 +303,13 @@ class EditorUBIGUIA(tk.Tk):
         path = self.selected_path()
         if path:
             folder = path / SHARED_IMAGES_FOLDER
+            folder.mkdir(parents=True, exist_ok=True)
+            open_folder(folder)
+
+    def open_videos(self):
+        path = self.selected_path()
+        if path:
+            folder = path / SHARED_VIDEOS_FOLDER
             folder.mkdir(parents=True, exist_ok=True)
             open_folder(folder)
 

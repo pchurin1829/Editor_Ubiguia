@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "2b91111d-5904-52fd-9ff1-093e60cb1daa",
+    "poi_order":  "06",
+    "poi_name":  "Parque de la Ciudad",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "POSADAS",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "posadas",
+    "lat":  "-27.4021020",
+    "lng":  "-55.9702369"
+}

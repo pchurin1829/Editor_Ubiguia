@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "014ec6c6-c9ec-59f6-b02d-bd5af513b082",
+    "poi_order":  "08",
+    "poi_name":  "La Aripuca",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "PUERTO IGUAZU",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "puerto-iguazu",
+    "lat":  "-25.6184135",
+    "lng":  "-54.5583455"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "c42a7852-155b-54d3-aff2-dbe38a8c5185",
+    "poi_order":  "09",
+    "poi_name":  "Museo Güemes",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "SALTA",
+    "city":  "SALTA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "salta",
+    "city_slug":  "salta",
+    "lat":  "-24.7883434",
+    "lng":  "-65.4127986"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "79164c3e-79cf-588f-bd37-0a9d472ff35e",
+    "poi_order":  "08",
+    "poi_name":  "Centro (Av. San Martín)",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "NEUQUEN",
+    "city":  "SAN MARTIN DE LOS ANDES",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "neuquen",
+    "city_slug":  "san-martin-de-los-andes",
+    "lat":  "-40.1576682",
+    "lng":  "-71.3525810"
+}

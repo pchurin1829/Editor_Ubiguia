@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a97f3e45-1fc3-5aae-8d83-002558bbf1c4",
+    "poi_order":  "13",
+    "poi_name":  "Recoleta (Cementerio)",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.5876855",
+    "lng":  "-58.3936215"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "1af3e673-27ac-5293-8c6a-bdcb7f5081e7",
+    "poi_order":  "09",
+    "poi_name":  "Reserva Ecológica Costanera Sur",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6069493",
+    "lng":  "-58.3527424"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "b1cb73cf-eca8-5419-8a04-5a59760ef97c",
+    "poi_order":  "16",
+    "poi_name":  "Parque Saavedra",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9315798",
+    "lng":  "-57.9398677"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "d715c704-5582-53f9-9f6b-8ee93700f881",
+    "poi_order":  "12",
+    "poi_name":  "Museo Yamana",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.8058410",
+    "lng":  "-68.3010747"
+}

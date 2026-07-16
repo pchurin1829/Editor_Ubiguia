@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "f40c6cf3-3b28-510b-a922-f9d70ba9e535",
+    "lang":  "INGLES",
+    "title":  "Punto Panorámico",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:28",
+    "version":  1
+}

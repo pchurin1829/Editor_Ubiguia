@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "c3c9942d-1b0e-55fd-8d30-6fb5be36080b",
+    "poi_order":  "01",
+    "poi_name":  "Parque Nacional Tierra del Fuego",
+    "tier":  "top",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.8341530",
+    "lng":  "-68.4615314"
+}

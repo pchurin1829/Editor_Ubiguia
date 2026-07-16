@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "46a5caac-3502-5f74-83f5-9e8f4ffd03bb",
+    "poi_order":  "19",
+    "poi_name":  "Cementerio de La Plata",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9579102",
+    "lng":  "-57.9532512"
+}

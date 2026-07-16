@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "04f3134c-84f5-5be5-84b9-122e69728183",
+    "poi_order":  "08",
+    "poi_name":  "Ruinas de San Francisco",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-32.8787342",
+    "lng":  "-68.8298601"
+}

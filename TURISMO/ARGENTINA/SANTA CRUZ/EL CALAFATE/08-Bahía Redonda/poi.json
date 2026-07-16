@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "2303f208-9555-5b27-a9e7-363573228aeb",
+    "poi_order":  "08",
+    "poi_name":  "Bahía Redonda",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "SANTA CRUZ",
+    "city":  "EL CALAFATE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-cruz",
+    "city_slug":  "el-calafate",
+    "lat":  "-50.3399851",
+    "lng":  "-72.2765337"
+}

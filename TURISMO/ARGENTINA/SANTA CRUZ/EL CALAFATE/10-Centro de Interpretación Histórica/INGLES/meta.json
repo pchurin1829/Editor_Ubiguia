@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "c68aafc3-7bf5-5792-afa1-853d65850a20",
+    "lang":  "INGLES",
+    "title":  "Centro de Interpretación Histórica",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:33",
+    "version":  1
+}

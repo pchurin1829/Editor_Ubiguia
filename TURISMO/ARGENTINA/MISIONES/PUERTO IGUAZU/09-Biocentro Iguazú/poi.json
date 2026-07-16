@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a351addb-4777-53ac-930a-94100aa5b80a",
+    "poi_order":  "09",
+    "poi_name":  "Biocentro Iguazú",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "PUERTO IGUAZU",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "puerto-iguazu",
+    "lat":  "-25.6183687",
+    "lng":  "-54.5563012"
+}

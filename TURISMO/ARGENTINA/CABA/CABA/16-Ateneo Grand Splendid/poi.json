@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "40e3e736-2813-5ac5-be51-72450c1d1979",
+    "poi_order":  "16",
+    "poi_name":  "Ateneo Grand Splendid",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.5959828",
+    "lng":  "-58.3942623"
+}

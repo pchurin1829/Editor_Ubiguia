@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "89026093-0cb8-56d4-b3e1-bf50df3342e1",
+    "poi_order":  "19",
+    "poi_name":  "Plaza Chile",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-32.8864264",
+    "lng":  "-68.8469811"
+}

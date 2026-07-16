@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "ace8f2b2-2fea-5a63-8702-3ef212a0e9e3",
+    "poi_order":  "09",
+    "poi_name":  "Mercado Central de Mendoza",
+    "tier":  "secondary",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-32.8851314",
+    "lng":  "-68.8416352"
+}

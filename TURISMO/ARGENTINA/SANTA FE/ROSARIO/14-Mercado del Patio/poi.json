@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "1b09744e-0d1a-5fa0-bd57-6340a4d71d49",
+    "poi_order":  "14",
+    "poi_name":  "Mercado del Patio",
+    "tier":  "secondary",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.9399011",
+    "lng":  "-60.6695701"
+}

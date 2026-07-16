@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "1d09816b-6917-54e5-bf49-434b41d64633",
+    "poi_order":  "11",
+    "poi_name":  "La Cañada",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CORDOBA",
+    "city":  "CORDOBA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "cordoba",
+    "city_slug":  "cordoba",
+    "lat":  "-30.0925195",
+    "lng":  "-63.3644777"
+}

@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "131fb081-d2c3-5fd2-9187-1274057fbd21",
+    "poi_order":  "08",
+    "poi_name":  "Museo del Fin del Mundo",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "TIERRA DEL FUEGO",
+    "city":  "USHUAIA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "tierra-del-fuego",
+    "city_slug":  "ushuaia",
+    "lat":  "-54.8059650",
+    "lng":  "-68.3002588"
+}

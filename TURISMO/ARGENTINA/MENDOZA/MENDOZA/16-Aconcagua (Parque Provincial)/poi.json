@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "c180e515-9104-5476-9d61-655cff099d01",
+    "poi_order":  "16",
+    "poi_name":  "Aconcagua (Parque Provincial)",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "MENDOZA",
+    "city":  "MENDOZA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "mendoza",
+    "city_slug":  "mendoza",
+    "lat":  "-32.6759207",
+    "lng":  "-69.9454087"
+}

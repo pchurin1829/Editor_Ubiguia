@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "012faafb-3e2c-5f6f-a3c3-04983944e3f0",
+    "poi_order":  "07",
+    "poi_name":  "Diagonal 73 (centro)",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-37.9998279",
+    "lng":  "-57.5549981"
+}

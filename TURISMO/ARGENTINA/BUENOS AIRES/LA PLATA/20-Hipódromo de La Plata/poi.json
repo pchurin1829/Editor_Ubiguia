@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "12c95bd6-4862-5771-a67b-9cb6f22e1df2",
+    "poi_order":  "20",
+    "poi_name":  "Hipódromo de La Plata",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9012673",
+    "lng":  "-57.9438043"
+}

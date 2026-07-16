@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "8990ac28-22ca-5a04-ab1b-3f7ac0e27631",
+    "poi_order":  "14",
+    "poi_name":  "Cascada Regimiento",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "NEUQUEN",
+    "city":  "SAN MARTIN DE LOS ANDES",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "neuquen",
+    "city_slug":  "san-martin-de-los-andes",
+    "lat":  "-40.1325717",
+    "lng":  "-71.3321736"
+}

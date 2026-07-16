@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "45a4d489-7dc1-5e4b-9a7d-c42a744ea4e6",
+    "poi_order":  "11",
+    "poi_name":  "Puerto Pañuelo",
+    "tier":  "secondary",
+    "category":  "Experiencia/Transporte",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.0522780",
+    "lng":  "-71.5310036"
+}

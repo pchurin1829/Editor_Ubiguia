@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "0486d93b-1eb2-547e-a875-924a2a7ed258",
+    "poi_order":  "10",
+    "poi_name":  "Jardín de los Picaflores",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "PUERTO IGUAZU",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "puerto-iguazu",
+    "lat":  "-25.6001567",
+    "lng":  "-54.5686094"
+}

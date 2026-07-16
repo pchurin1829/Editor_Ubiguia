@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "40fbdf15-41b6-5e04-9dc1-cecff9f7d4af",
+    "poi_order":  "05",
+    "poi_name":  "Cerro Campanario",
+    "tier":  "top",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.0757505",
+    "lng":  "-71.4764209"
+}

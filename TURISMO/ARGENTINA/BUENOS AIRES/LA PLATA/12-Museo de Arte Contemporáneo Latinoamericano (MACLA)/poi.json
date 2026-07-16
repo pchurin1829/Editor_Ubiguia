@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "473d9848-6689-5477-a542-3d40570097c8",
+    "poi_order":  "12",
+    "poi_name":  "Museo de Arte Contemporáneo Latinoamericano (MACLA)",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "LA PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "la-plata",
+    "lat":  "-34.9141560",
+    "lng":  "-57.9497860"
+}

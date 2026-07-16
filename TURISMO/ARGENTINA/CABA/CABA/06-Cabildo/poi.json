@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "d3b43f0a-b787-59ba-8bbf-2da84fed0759",
+    "poi_order":  "06",
+    "poi_name":  "Cabildo",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6088795",
+    "lng":  "-58.3736709"
+}

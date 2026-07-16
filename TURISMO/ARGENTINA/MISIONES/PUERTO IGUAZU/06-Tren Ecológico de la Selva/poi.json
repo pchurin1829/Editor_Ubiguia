@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "603de768-2771-55d6-8ddb-354506b1816a",
+    "poi_order":  "06",
+    "poi_name":  "Tren Ecológico de la Selva",
+    "tier":  "secondary",
+    "category":  "Experiencia/Transporte",
+    "country":  "ARGENTINA",
+    "province":  "MISIONES",
+    "city":  "PUERTO IGUAZU",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "misiones",
+    "city_slug":  "puerto-iguazu",
+    "lat":  "-25.6837971",
+    "lng":  "-54.4489985"
+}

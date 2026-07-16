@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "4b54f250-a566-5fea-96cb-d136874a3cac",
+    "poi_order":  "06",
+    "poi_name":  "Reserva Laguna Nimez",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "SANTA CRUZ",
+    "city":  "EL CALAFATE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-cruz",
+    "city_slug":  "el-calafate",
+    "lat":  "-50.3249875",
+    "lng":  "-72.2686760"
+}

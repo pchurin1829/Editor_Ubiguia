@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "1d09816b-6917-54e5-bf49-434b41d64633",
+    "lang":  "PORTUGUES",
+    "title":  "La Cañada",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:25",
+    "version":  1
+}

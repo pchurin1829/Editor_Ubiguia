@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "0a2fbda4-fdc9-5694-8434-b9a7f6df1886",
+    "poi_order":  "12",
+    "poi_name":  "Estadio La Bombonera",
+    "tier":  "secondary",
+    "category":  "Deporte",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6355171",
+    "lng":  "-58.3649163"
+}

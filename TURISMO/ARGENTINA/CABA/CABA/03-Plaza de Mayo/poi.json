@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "f3d7cb80-a767-5861-943c-d23f5e5b465d",
+    "poi_order":  "03",
+    "poi_name":  "Plaza de Mayo",
+    "tier":  "top",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.6084453",
+    "lng":  "-58.3721787"
+}

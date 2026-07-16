@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "6cf07a87-c24e-58d4-bedc-4c78f12a6b82",
+    "poi_order":  "15",
+    "poi_name":  "Paseo Aldrey",
+    "tier":  "secondary",
+    "category":  "Paseo/Compras",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "MAR DEL PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "mar-del-plata",
+    "lat":  "-38.0125528",
+    "lng":  "-57.5441204"
+}

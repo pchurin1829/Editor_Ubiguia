@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "68bb4c8d-1c07-5d21-98cf-f9140e6c1ee3",
+    "poi_order":  "20",
+    "poi_name":  "Museo MALBA",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.5768817",
+    "lng":  "-58.4033919"
+}

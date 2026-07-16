@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "f40c6cf3-3b28-510b-a922-f9d70ba9e535",
+    "poi_order":  "04",
+    "poi_name":  "Punto Panorámico",
+    "tier":  "top",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "RIO NEGRO",
+    "city":  "SAN CARLOS DE BARILOCHE",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "rio-negro",
+    "city_slug":  "san-carlos-de-bariloche",
+    "lat":  "-41.0717457",
+    "lng":  "-71.5223926"
+}

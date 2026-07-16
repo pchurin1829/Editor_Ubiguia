@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "a65fd363-af13-5a0a-8e0e-ceddfc5823b7",
+    "poi_order":  "19",
+    "poi_name":  "Planetario Galileo Galilei",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.5696486",
+    "lng":  "-58.4117210"
+}

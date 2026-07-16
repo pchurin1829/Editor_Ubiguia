@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "c81fc853-ebda-52fd-9992-13e3b6f7f523",
+    "poi_order":  "06",
+    "poi_name":  "El Rosedal de Rosario",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.8480064",
+    "lng":  "-60.7019620"
+}

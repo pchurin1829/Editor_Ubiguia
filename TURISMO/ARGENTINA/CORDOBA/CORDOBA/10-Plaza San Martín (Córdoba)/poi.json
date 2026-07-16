@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "9e21d0e7-61fa-5897-85ab-72304246374e",
+    "poi_order":  "10",
+    "poi_name":  "Plaza San Martín (Córdoba)",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "CORDOBA",
+    "city":  "CORDOBA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "cordoba",
+    "city_slug":  "cordoba",
+    "lat":  "-31.4167363",
+    "lng":  "-64.1835807"
+}

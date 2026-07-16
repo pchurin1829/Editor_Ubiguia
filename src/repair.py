@@ -1,6 +1,7 @@
 from pathlib import Path
 from constants import *
-from filesystem import ensure_dir, rewrite_utf8
+from filesystem import rewrite_utf8
+from poi_manager import ensure_poi_structure
 def title(p): return p.name.split("-",1)[1].strip() if "-" in p.name else p.name
 def repair_poi(p):
  a=[]
@@ -12,9 +13,9 @@ def repair_poi(p):
   old=sorted(p.glob("POI_MASTER-*.md"))
   if old: old[0].rename(master); a.append("MASTER antiguo renombrado")
   else: master.write_text(f"# POI MASTER\n\n# {title(p)}\n",encoding="utf-8"); a.append("Creado POI_MASTER.md")
- ensure_dir(p/SHARED_IMAGES_FOLDER)
+ ensure_poi_structure(p)
  for lang in LANGUAGES:
-  ld=p/lang; ensure_dir(ld/AUDIO_FOLDER)
+  ld=p/lang
   if not (ld/TEXT_FILE).exists(): (ld/TEXT_FILE).write_text(f"# {title(p)}\n",encoding="utf-8"); a.append(f"Creado {lang}/texto.md")
   if not (ld/META_FILE).exists(): (ld/META_FILE).write_text("{}",encoding="utf-8"); a.append(f"Creado {lang}/meta.json")
  c=sum(1 for f in p.rglob("*") if f.is_file() and rewrite_utf8(f))

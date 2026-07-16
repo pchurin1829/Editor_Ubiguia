@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "74d13ad0-6375-5d6e-a2c7-3dd57cdb87cf",
+    "poi_order":  "05",
+    "poi_name":  "Parque Independencia",
+    "tier":  "top",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.9591546",
+    "lng":  "-60.6600095"
+}

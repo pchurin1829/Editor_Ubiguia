@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "d5489712-6699-5dfc-877d-cce9e756da32",
+    "poi_order":  "14",
+    "poi_name":  "Centro Cultural Recoleta",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "CABA",
+    "city":  "CABA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "caba",
+    "city_slug":  "caba",
+    "lat":  "-34.5862782",
+    "lng":  "-58.3925409"
+}

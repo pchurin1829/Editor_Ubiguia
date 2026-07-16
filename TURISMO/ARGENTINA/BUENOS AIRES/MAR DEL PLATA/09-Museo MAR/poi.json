@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "b8f51509-5c5b-539f-aa9a-7aca680178eb",
+    "poi_order":  "09",
+    "poi_name":  "Museo MAR",
+    "tier":  "secondary",
+    "category":  "Museo/Cultura",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "MAR DEL PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "mar-del-plata",
+    "lat":  "-37.9733464",
+    "lng":  "-57.5436820"
+}

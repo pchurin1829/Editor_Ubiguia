@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "b559bfb4-386d-5ee1-b3e4-ba9c0779b7db",
+    "poi_order":  "13",
+    "poi_name":  "Laguna de los Padres",
+    "tier":  "secondary",
+    "category":  "Naturaleza",
+    "country":  "ARGENTINA",
+    "province":  "BUENOS AIRES",
+    "city":  "MAR DEL PLATA",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "buenos-aires",
+    "city_slug":  "mar-del-plata",
+    "lat":  "-38.0517012",
+    "lng":  "-57.5908510"
+}

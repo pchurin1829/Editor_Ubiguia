@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "f3d7cb80-a767-5861-943c-d23f5e5b465d",
+    "lang":  "INGLES",
+    "title":  "Plaza de Mayo",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:22",
+    "version":  1
+}

@@ -1,0 +1,22 @@
+﻿{
+    "poi_id":  "15e56a89-b196-52d1-83e7-d05f314cb6b1",
+    "lang":  "INGLES",
+    "title":  "Museo de la Patagonia",
+    "summary":  "",
+    "content_markdown":  "texto.md",
+    "main_audio":  "",
+    "audio_playlist":  [
+
+                       ],
+    "images":  [
+
+               ],
+    "qr":  [
+
+           ],
+    "tags":  [
+
+             ],
+    "updated_at":  "2025-12-22T11:30:28",
+    "version":  1
+}

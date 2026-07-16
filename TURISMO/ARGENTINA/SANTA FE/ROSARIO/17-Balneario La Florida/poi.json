@@ -1,0 +1,16 @@
+﻿{
+    "poi_id":  "b3ce2909-ae67-5cab-b1c3-967362918b5a",
+    "poi_order":  "17",
+    "poi_name":  "Balneario La Florida",
+    "tier":  "secondary",
+    "category":  "Atracción",
+    "country":  "ARGENTINA",
+    "province":  "SANTA FE",
+    "city":  "ROSARIO",
+    "country_code":  "AR",
+    "country_slug":  "argentina",
+    "province_slug":  "santa-fe",
+    "city_slug":  "rosario",
+    "lat":  "-32.8824879",
+    "lng":  "-60.6872188"
+}
