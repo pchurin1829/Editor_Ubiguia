@@ -247,15 +247,74 @@ class EditorUBIGUIA(tk.Tk):
             f"{mark(audio_pt > 0)} Audio PT"
         )
 
+    def ask_optional_text(self, title, prompt, initial=""):
+        win = tk.Toplevel(self)
+        win.title(title)
+        win.resizable(False, False)
+        win.transient(self)
+
+        ttk.Label(win, text=prompt).pack(padx=12, pady=(12, 6))
+        var = tk.StringVar(value=initial)
+        entry = ttk.Entry(win, textvariable=var, width=40)
+        entry.pack(padx=12, pady=(0, 6), fill="x")
+
+        result = {"value": None}
+
+        def on_ok(event=None):
+            result["value"] = var.get()
+            win.destroy()
+
+        def on_cancel(event=None):
+            result["value"] = None
+            win.destroy()
+
+        btns = ttk.Frame(win)
+        btns.pack(pady=(0, 12))
+        ttk.Button(btns, text="OK", command=on_ok).pack(side="left", padx=4)
+        ttk.Button(btns, text="Cancelar", command=on_cancel).pack(side="left", padx=4)
+
+        win.bind("<Return>", on_ok)
+        win.bind("<Escape>", on_cancel)
+        win.protocol("WM_DELETE_WINDOW", on_cancel)
+
+        win.update_idletasks()
+        x = self.winfo_rootx() + (self.winfo_width() - win.winfo_width()) // 2
+        y = self.winfo_rooty() + (self.winfo_height() - win.winfo_height()) // 2
+        win.geometry(f"+{x}+{y}")
+
+        win.grab_set()
+        win.lift()
+        win.focus_force()
+        entry.focus_set()
+        entry.select_range(0, tk.END)
+
+        self.wait_window(win)
+        return result["value"]
+
+    def select_poi_in_list(self, name):
+        items = self.poi_list.get(0, tk.END)
+        if name not in items:
+            return
+        idx = items.index(name)
+        self.poi_list.selection_clear(0, tk.END)
+        self.poi_list.selection_set(idx)
+        self.poi_list.activate(idx)
+        self.poi_list.see(idx)
+
     def new_poi(self):
         number = next_poi_number(list_pois(self.turismo_root(), self.country_var.get(), self.province_var.get(), self.city_var.get()))
-        name = simpledialog.askstring("Nuevo POI", f"Número sugerido: {number}\n\nNombre:")
+        name = simpledialog.askstring("Nuevo POI", f"Número sugerido: {number}\n\nNombre:", parent=self)
         if not name:
             return
-        category = simpledialog.askstring("Nuevo POI", "Categoría (opcional):") or ""
+        category = self.ask_optional_text("Nuevo POI", "Categoría (opcional):")
+        if category is None:
+            return
         try:
+            created_name = f"{number}-{name.strip()}"
             create_poi(self.turismo_root(), self.country_var.get(), self.province_var.get(), self.city_var.get(), number, name, category)
             self.refresh_pois()
+            self.select_poi_in_list(created_name)
+            self.update_status()
             messagebox.showinfo("Listo", "POI creado correctamente.")
         except Exception as exc:
             messagebox.showerror("Error", str(exc))
