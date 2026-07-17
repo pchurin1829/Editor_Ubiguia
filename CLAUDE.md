@@ -1,50 +1,99 @@
-# Editor UBIGUIA — Instrucciones permanentes
+# CLAUDE.md
 
-## Inicio obligatorio de cada sesión
+# Proyecto
 
-Antes de modificar cualquier archivo:
+Editor UBIGUIA
 
-1. Leer CLAUDE.md completo.
-2. Leer PROJECT_STATUS.md completo.
-3. Ejecutar git status.
-4. Revisar los últimos commits relevantes.
-5. Confirmar cuál es la tarea pendiente actual.
-6. No asumir que una tarea anterior quedó completa: verificar código, Git y filesystem.
+Sistema para administrar y generar el contenido turístico utilizado por UBIGUIA.
 
-## Principios de trabajo
+El objetivo principal es producir contenido de alta calidad y administrar los POIs de manera segura y consistente.
 
-- Priorizar terminar tareas antes que rediseñar o mejorar continuamente.
-- No cambiar arquitectura, estructura de carpetas ni decisiones aprobadas salvo que exista un problema real.
-- No crear documentación nueva salvo que sea imprescindible.
-- Mantener los cambios pequeños, verificables y con alcance claro.
-- No borrar, mover ni sobrescribir archivos existentes sin confirmación.
-- No hacer commit ni push salvo que el usuario lo pida expresamente.
-- Antes de un commit, revisar git diff y git status.
-- No usar git add . cuando existan archivos de prueba, temporales o no relacionados.
-- Agregar al commit solamente los archivos correspondientes a la tarea.
-- No incluir credenciales, claves API, contraseñas ni archivos locales sensibles.
+---
 
-## Regla obligatoria de cierre de sesión
+# Arquitectura
 
-Antes de terminar cualquier sesión que haya modificado el proyecto:
+El proyecto administra:
 
-1. Actualizar PROJECT_STATUS.md.
-2. Registrar:
-   - fecha;
-   - qué se completó;
-   - qué quedó pendiente;
-   - decisiones nuevas;
-   - pruebas realizadas;
-   - archivos modificados;
-   - último commit relevante, si existe;
-   - instrucción concreta para retomar.
-3. Ejecutar git status.
-4. Informar claramente si existen cambios sin commit o archivos sin trackear.
-5. No declarar la tarea terminada si PROJECT_STATUS.md quedó desactualizado.
+- POIs
+- Textos
+- Traducciones
+- Audios
+- Imágenes
+- Videos
+- Metadatos
+- Exportación
 
-## Fuente de verdad
+La estructura de carpetas definida para los POIs se considera estable.
 
-- El código y Git son la fuente de verdad técnica.
-- CLAUDE.md contiene las reglas permanentes.
-- PROJECT_STATUS.md contiene el estado operativo actual.
-- Las conversaciones anteriores son contexto auxiliar, no la fuente principal.
+---
+
+# Principios del Proyecto
+
+- Priorizar terminar funcionalidades antes que reorganizar el proyecto.
+- No rediseñar estructuras ya aprobadas.
+- No modificar la organización de carpetas salvo autorización.
+- No mover automáticamente contenido existente.
+- No generar documentación innecesaria.
+- Priorizar producción de contenido sobre mejoras cosméticas.
+- No reabrir decisiones ya aprobadas.
+- Si una decisión figura en esta documentación, se considera definitiva salvo impedimento técnico objetivo.
+
+---
+
+# Estructura Oficial de un POI
+
+Cada POI debe mantener la estructura oficial del proyecto.
+
+Las carpetas compartidas:
+
+- imagenes
+- videos
+
+Las carpetas específicas por idioma:
+
+- ESPAÑOL
+- INGLES
+- PORTUGUES
+
+Cada idioma mantiene:
+
+- texto
+- metadatos
+- audio
+
+---
+
+# Flujo de Producción
+
+El orden oficial de producción es:
+
+1. Texto Español
+2. Texto Inglés
+3. Texto Portugués
+4. Importación
+5. Audio Español
+6. Audio Inglés
+7. Audio Portugués
+8. Verificación
+9. Commit
+
+---
+
+# Git
+
+- Commits pequeños.
+- Un cambio funcional = un commit.
+- Compilar o validar antes de cada commit.
+- Mantener origin/main sincronizado.
+
+---
+
+# Documentación
+
+El proyecto utiliza únicamente estos documentos como referencia permanente:
+
+- CLAUDE.md
+- ROADMAP.md
+- PROJECT_STATUS.md
+
+No generar documentación adicional salvo que aporte valor real.
