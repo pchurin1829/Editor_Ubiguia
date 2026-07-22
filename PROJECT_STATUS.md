@@ -2,7 +2,7 @@
 
 Este documento refleja únicamente el estado actual del proyecto.
 
-No constituye un historial.
+No constituye un historial de cambios. Para el detalle de las implementaciones realizadas deberá consultarse el CHANGELOG del proyecto.
 
 ---
 
@@ -12,13 +12,18 @@ Proyecto operativo.
 
 Repositorio sincronizado con GitHub.
 
-La estructura definitiva de POIs se encuentra establecida.
+La estructura definitiva del Editor UBIGUIA se encuentra establecida.
 
-Actualmente el desarrollo se encuentra en la FASE 2 del ROADMAP.
+Actualmente el desarrollo se encuentra dividido en dos grandes áreas:
+
+- Editor de POIs
+- Motor de Investigación
 
 ---
 
-# Implementado
+# Editor de POIs
+
+## Implementado
 
 ✔ Organización definitiva de carpetas
 
@@ -34,13 +39,11 @@ Actualmente el desarrollo se encuentra en la FASE 2 del ROADMAP.
 
 ✔ Generación de artículos mediante IA
 
-✔ Prompts maestros
+✔ Sistema de Prompts
 
 ✔ Corrección del modal de Categoría
 
----
-
-# Validado
+## Validado
 
 ✔ Organización de carpetas
 
@@ -48,18 +51,41 @@ Actualmente el desarrollo se encuentra en la FASE 2 del ROADMAP.
 
 ✔ Configuración local
 
-✔ Funcionamiento del Editor
+✔ Funcionamiento general del Editor
 
 Pendiente únicamente la validación manual definitiva del modal de Categoría.
 
 ---
 
-# Decisiones Permanentes
+# Motor de Investigación
 
-- La estructura de carpetas está congelada.
-- No mover automáticamente contenido existente.
-- Priorizar producción de contenido antes que reorganizaciones.
-- Mantener un flujo uniforme para todos los POIs.
+## Implementado
+
+✔ Arquitectura del Motor de Investigación
+
+✔ Flujo editorial completo
+
+    Investigar → Revisar → Aprobar
+
+✔ Proveedor Simulado
+
+✔ Proveedor Anthropic
+
+✔ Sistema de Prompts externos
+
+✔ Infraestructura para versiones de Prompt
+
+✔ Integración con el Editor
+
+✔ Suite de pruebas automatizadas
+
+## Estado actual
+
+Motor completamente operativo para la etapa actual.
+
+Total de pruebas automatizadas:
+
+76 pruebas — todas aprobadas.
 
 ---
 
@@ -67,36 +93,49 @@ Pendiente únicamente la validación manual definitiva del modal de Categoría.
 
 FASE 2 — Editor de POIs
 
+FASE 3 — Motor de Investigación
+
 ---
 
 # Próxima Tarea
 
-Validar manualmente el modal de Categoría.
+## Editor
 
-Luego continuar con la producción del contenido del Pasaje Dardo Rocha:
+- Validar manualmente el modal de Categoría.
 
-- completar Español;
-- generar Inglés;
-- generar Portugués;
-- generar audios;
-- validar la importación.
+## Motor de Investigación
+
+- Redactar y aprobar el Prompt Maestro de Investigación v1.0.
+- Integrarlo al sistema reemplazando el prompt temporal.
+- Validarlo utilizando POIs reales.
+- Ajustar la versión 1.1 si fuera necesario.
 
 ---
 
-# Pendiente para las siguientes etapas
+# Pendiente para etapas futuras
 
-- Historial.
-- Versionado.
-- Validación automática.
-- Revisión automática.
-- Administración multimedia.
-- Exportación.
-- Sincronización con la App.
+Editor
+
+- Historial
+- Versionado
+- Validación automática
+- Revisión automática
+- Administración multimedia
+- Exportación
+- Sincronización con la App
+
+Motor de Investigación
+
+- Descubrimiento automático de entidades
+- Traducción automática
+- Generación de audio
+- Exportación ZIP
+- Integración completa con el flujo editorial
 
 ---
 
 # Última actualización
 
-La infraestructura del Editor se encuentra estable.
+El Editor UBIGUIA se encuentra estable.
 
-El proyecto está listo para continuar con la producción de contenido.
+El Motor de Investigación se encuentra implementado y listo para comenzar la etapa de validación editorial mediante el Prompt Maestro de Investigación.
