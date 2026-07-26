@@ -5,7 +5,12 @@ Motor de Investigación mientras no exista un proveedor real conectado.
 """
 from datetime import datetime
 
-from motor_investigacion.entidad import ContextoEntidad, FuenteInvestigacion, ResultadoInvestigacion
+from motor_investigacion.entidad import (
+    ContextoEntidad,
+    FuenteInvestigacion,
+    MetadatosProveedor,
+    ResultadoInvestigacion,
+)
 from motor_investigacion.proveedor import ProveedorInvestigacion
 
 
@@ -56,4 +61,7 @@ class ProveedorInvestigacionSimulado(ProveedorInvestigacion):
             borrador_master=borrador,
             fuentes=[fuente],
             contradicciones_detectadas=[],
+            observaciones="Contenido de prueba generado por ProveedorInvestigacionSimulado. No usar en producción.",
+            nivel_confianza="BAJO",
+            metadatos_proveedor=MetadatosProveedor(nombre=self.nombre, modelo=self.modelo),
         )

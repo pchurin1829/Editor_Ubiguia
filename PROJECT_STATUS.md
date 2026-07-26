@@ -77,6 +77,8 @@ Pendiente únicamente la validación manual definitiva del modal de Categoría.
 
 ✔ Prompt Maestro de Investigación v1.0 integrado como prompt operativo
 
+✔ Contrato real de salida estructurada (borrador, fuentes, contradicciones, observaciones, nivel de confianza)
+
 ✔ Integración con el Editor
 
 ✔ Suite de pruebas automatizadas
@@ -87,9 +89,11 @@ Motor completamente operativo para la etapa actual.
 
 El Prompt Maestro de Investigación v1.0 (`Docs/prompts/PROMPT_MAESTRO_INVESTIGACION_v1.0.md`) es la única fuente operativa del prompt utilizado por `ProveedorInvestigacionAnthropic`. El placeholder `PROMPT_INVESTIGACION_v1.md` fue retirado.
 
+`ProveedorInvestigacionAnthropic` ya solicita y valida una respuesta estructurada (JSON) del modelo, y queda preparado para recibir investigaciones reales en cuanto se incorpore búsqueda web. La búsqueda web todavía está pendiente: por ahora el modelo responde en base a su conocimiento general, sin consultar fuentes externas.
+
 Total de pruebas automatizadas:
 
-80 pruebas — todas aprobadas.
+98 pruebas — todas aprobadas.
 
 ---
 
@@ -109,9 +113,9 @@ FASE 3 — Motor de Investigación
 
 ## Motor de Investigación
 
-- Declaración formal de dependencias del Prompt Maestro de Investigación v1.0.
+- Implementación de búsqueda web real en `ProveedorInvestigacionAnthropic`.
 - Validarlo utilizando POIs reales.
-- Ajustar la versión 1.1 si fuera necesario.
+- Ajustar la versión 1.1 del Prompt Maestro si fuera necesario.
 
 ---
 

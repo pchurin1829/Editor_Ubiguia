@@ -1,5 +1,6 @@
-"""Pruebas de la Etapa 5 del Motor de Investigación de UBIGUIA:
-ProveedorInvestigacionAnthropic y la selección de proveedor activo.
+"""Pruebas de ProveedorInvestigacionAnthropic: conexión con la API,
+selección de proveedor activo, uso del Prompt Maestro y (Paso 4) el
+contrato de respuesta estructurada y validada.
 
 Ninguna prueba de este archivo llama a la API real de Anthropic: todas
 las llamadas HTTP están mockeadas. No requieren ANTHROPIC_API_KEY real
@@ -7,6 +8,7 @@ ni conexión a Internet.
 
 Ejecutar con:  python -m unittest discover -s tests -v
 """
+import json
 import os
 import sys
 import unittest
@@ -22,7 +24,7 @@ import httpx  # noqa: E402
 
 import anthropic  # noqa: E402
 from motor_investigacion import proveedor_activo  # noqa: E402
-from motor_investigacion.entidad import ContextoEntidad  # noqa: E402
+from motor_investigacion.entidad import ContextoEntidad, FuenteInvestigacion, MetadatosProveedor  # noqa: E402
 from motor_investigacion.proveedor import ProveedorInvestigacion  # noqa: E402
 from motor_investigacion.proveedor_anthropic import (  # noqa: E402
     DEFAULT_MODEL,
@@ -49,6 +51,42 @@ def _contexto_de_prueba() -> ContextoEntidad:
 
 def _respuesta_falsa(texto: str) -> SimpleNamespace:
     return SimpleNamespace(content=[SimpleNamespace(type="text", text=texto)])
+
+
+def _borrador_markdown_valido(nombre_poi: str = "POI de Prueba") -> str:
+    """Borrador mínimo pero válido: incluye las 13 secciones numeradas
+    obligatorias, sin redactar el contenido real del Prompt Maestro."""
+    secciones = "\n\n".join(f"## {n}. Sección {n}\n\nContenido de prueba." for n in range(1, 14))
+    return f"# {nombre_poi}\n\n{secciones}\n"
+
+
+def _datos_respuesta_valida(**overrides) -> dict:
+    datos = {
+        "borrador_markdown": _borrador_markdown_valido(),
+        "fuentes": [
+            {
+                "titulo": "Fuente de prueba",
+                "url": "https://ejemplo.invalid/fuente",
+                "sitio": "Sitio de prueba",
+                "consultado_en": "2026-07-26T10:00:00",
+                "secciones_respaldadas": ["2. Sección 2"],
+                "confianza": "alta",
+                "notas": "Nota de prueba.",
+                "identificador": "src-01",
+            }
+        ],
+        "contradicciones": [
+            {"topic": "año de inauguración", "sources": ["src-01"], "detail": "Detalle de prueba."}
+        ],
+        "observaciones": "Observación de prueba para el editor.",
+        "nivel_confianza": "MEDIO",
+    }
+    datos.update(overrides)
+    return datos
+
+
+def _respuesta_estructurada_valida(**overrides) -> SimpleNamespace:
+    return _respuesta_falsa(json.dumps(_datos_respuesta_valida(**overrides)))
 
 
 def _error_http(clase_excepcion, status_code: int, mensaje: str):
@@ -87,27 +125,10 @@ class PruebasProveedorAnthropic(unittest.TestCase):
         with self.assertRaises(ErrorProveedorAnthropic):
             proveedor.investigar_entidad(_contexto_de_prueba())
 
-    def test_genera_borrador_y_fuentes_identificables_con_llamada_mockeada(self):
-        os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
-        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
-            instancia = ClienteFalso.return_value
-            instancia.messages.create.return_value = _respuesta_falsa(
-                "Hola, recibí el mensaje sobre POI de Prueba."
-            )
-            resultado = ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
-
-        instancia.messages.create.assert_called_once()
-        self.assertIn("ProveedorInvestigacionAnthropic", resultado.borrador_master)
-        self.assertIn("POI de Prueba", resultado.borrador_master)
-        self.assertIn("Hola, recibí el mensaje", resultado.borrador_master)
-        self.assertEqual(len(resultado.fuentes), 1)
-        self.assertIn("Anthropic", resultado.fuentes[0].notas)
-        self.assertEqual(resultado.contradicciones_detectadas, [])
-
     def test_no_consume_la_api_real_el_cliente_queda_mockeado(self):
         os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
         with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
-            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa("ok")
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
         ClienteFalso.assert_called_once_with(api_key="clave-de-prueba")
 
@@ -183,8 +204,8 @@ class PruebasCrearProveedor(unittest.TestCase):
 
 
 class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
-    """Etapa 6: el proveedor ya no tiene ningún prompt hardcodeado —
-    debe cargarlo siempre desde disco vía cargar_prompt()."""
+    """El proveedor no tiene ningún prompt hardcodeado — debe cargarlo
+    siempre desde disco vía cargar_prompt()."""
 
     def setUp(self):
         self._entorno_previo = dict(os.environ)
@@ -198,7 +219,7 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
             ) as mock_cargar,
             mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso,
         ):
-            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa("ok")
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
 
         mock_cargar.assert_called_once_with("PROMPT_MAESTRO_INVESTIGACION_v1.0.md")
@@ -211,7 +232,7 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
             ),
             mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso,
         ):
-            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa("ok")
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
 
         _args, kwargs = ClienteFalso.return_value.messages.create.call_args
@@ -228,7 +249,7 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
         contenido_real = cargar_prompt_real("PROMPT_MAESTRO_INVESTIGACION_v1.0.md")
 
         with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
-            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa("ok")
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
 
         _args, kwargs = ClienteFalso.return_value.messages.create.call_args
@@ -238,7 +259,7 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
     def test_el_proveedor_no_contiene_un_prompt_hardcodeado(self):
         import inspect
 
-        codigo_fuente = inspect.getsource(ProveedorInvestigacionAnthropic._construir_prompt_prueba)
+        codigo_fuente = inspect.getsource(ProveedorInvestigacionAnthropic._construir_prompt)
         # El único origen de texto instructivo es cargar_prompt(); si
         # hubiera un prompt de respaldo escrito a mano, contendría
         # palabras propias del Prompt Maestro (por ejemplo "Investigador").
@@ -275,9 +296,164 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
         ClienteFalso.return_value.messages.create.assert_not_called()
 
 
+class PruebasRespuestaEstructurada(unittest.TestCase):
+    """Paso 4: el proveedor pide una respuesta JSON estructurada y
+    validable, y la transforma en un ResultadoInvestigacion completo.
+    Ninguna prueba de esta clase llama a la API real: la respuesta
+    'mockeada' simula la forma que tendría una respuesta real."""
+
+    def setUp(self):
+        self._entorno_previo = dict(os.environ)
+        self.addCleanup(lambda: (os.environ.clear(), os.environ.update(self._entorno_previo)))
+        os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
+
+    def _investigar_con_respuesta(self, respuesta):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = respuesta
+            return ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+
+    # 1 y 2: respuesta estructurada válida -> resultado correcto; el
+    # borrador completo llega intacto (sin envolverlo en ninguna plantilla).
+    def test_respuesta_valida_produce_resultado_con_el_borrador_completo(self):
+        datos = _datos_respuesta_valida()
+        resultado = self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertEqual(resultado.borrador_master, datos["borrador_markdown"])
+
+    # 3: las fuentes se conservan estructuradas.
+    def test_las_fuentes_se_conservan_estructuradas(self):
+        resultado = self._investigar_con_respuesta(_respuesta_estructurada_valida())
+        self.assertEqual(len(resultado.fuentes), 1)
+        fuente = resultado.fuentes[0]
+        self.assertIsInstance(fuente, FuenteInvestigacion)
+        self.assertEqual(fuente.titulo, "Fuente de prueba")
+        self.assertEqual(fuente.url, "https://ejemplo.invalid/fuente")
+        self.assertEqual(fuente.sitio, "Sitio de prueba")
+        self.assertEqual(fuente.consultado_en, "2026-07-26T10:00:00")
+        self.assertEqual(fuente.secciones_respaldadas, ["2. Sección 2"])
+        self.assertEqual(fuente.confianza, "alta")
+        self.assertEqual(fuente.notas, "Nota de prueba.")
+        self.assertEqual(fuente.identificador, "src-01")
+
+    # 4: las contradicciones se conservan.
+    def test_las_contradicciones_se_conservan(self):
+        datos = _datos_respuesta_valida()
+        resultado = self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertEqual(resultado.contradicciones_detectadas, datos["contradicciones"])
+
+    # 5: las observaciones se conservan.
+    def test_las_observaciones_se_conservan(self):
+        datos = _datos_respuesta_valida(observaciones="Observación específica de esta prueba.")
+        resultado = self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertEqual(resultado.observaciones, "Observación específica de esta prueba.")
+
+    # 6: el nivel de confianza se valida (caso válido) y se conserva,
+    # junto con los metadatos del proveedor y del modelo.
+    def test_nivel_de_confianza_valido_se_conserva_junto_a_metadatos(self):
+        for nivel in ("ALTO", "MEDIO", "BAJO"):
+            with self.subTest(nivel=nivel):
+                datos = _datos_respuesta_valida(nivel_confianza=nivel)
+                resultado = self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+                self.assertEqual(resultado.nivel_confianza, nivel)
+                self.assertEqual(resultado.metadatos_proveedor, MetadatosProveedor(nombre="anthropic", modelo=DEFAULT_MODEL))
+
+    def test_nivel_de_confianza_invalido_produce_error_claro(self):
+        datos = _datos_respuesta_valida(nivel_confianza="MUY_ALTO")
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertIn("nivel_confianza", str(ctx.exception))
+
+    # 7: falta de campo obligatorio -> error claro.
+    def test_falta_de_campo_obligatorio_produce_error_claro(self):
+        for campo in ("borrador_markdown", "fuentes", "contradicciones", "observaciones", "nivel_confianza"):
+            with self.subTest(campo=campo):
+                datos = _datos_respuesta_valida()
+                del datos[campo]
+                with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                    self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+                self.assertIn(campo, str(ctx.exception))
+
+    def test_borrador_vacio_produce_error_claro(self):
+        datos = _datos_respuesta_valida(borrador_markdown="   ")
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertIn("borrador_markdown", str(ctx.exception))
+
+    def test_borrador_sin_secciones_obligatorias_produce_error_claro(self):
+        datos = _datos_respuesta_valida(borrador_markdown="# POI de Prueba\n\nTexto sin secciones numeradas.")
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertIn("secciones", str(ctx.exception).lower())
+
+    # 8: tipo de dato incorrecto -> error claro.
+    def test_fuentes_con_tipo_incorrecto_produce_error_claro(self):
+        datos = _datos_respuesta_valida(fuentes="no es una lista")
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertIn("fuentes", str(ctx.exception))
+
+    def test_elemento_de_fuentes_con_tipo_incorrecto_produce_error_claro(self):
+        datos = _datos_respuesta_valida(fuentes=["esto debería ser un objeto"])
+        with self.assertRaises(ErrorProveedorAnthropic):
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+
+    def test_secciones_respaldadas_con_tipo_incorrecto_produce_error_claro(self):
+        datos = _datos_respuesta_valida()
+        datos["fuentes"][0]["secciones_respaldadas"] = "2. Sección 2"
+        with self.assertRaises(ErrorProveedorAnthropic):
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+
+    def test_contradicciones_con_tipo_incorrecto_produce_error_claro(self):
+        datos = _datos_respuesta_valida(contradicciones="no es una lista")
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertIn("contradicciones", str(ctx.exception))
+
+    def test_observaciones_con_tipo_incorrecto_produce_error_claro(self):
+        datos = _datos_respuesta_valida(observaciones=["no es texto"])
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+        self.assertIn("observaciones", str(ctx.exception))
+
+    # 9: JSON inválido o respuesta vacía -> error claro.
+    def test_json_invalido_produce_error_claro(self):
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa("esto no es JSON válido {{{"))
+        self.assertIn("JSON", str(ctx.exception))
+
+    def test_json_valido_pero_no_es_un_objeto_produce_error_claro(self):
+        with self.assertRaises(ErrorProveedorAnthropic):
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(["esto", "es", "una", "lista"])))
+
+    def test_respuesta_vacia_no_llega_a_intentar_parsear_json(self):
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(_respuesta_falsa("   "))
+        self.assertIn("vacía", str(ctx.exception).lower())
+
+    # 10: el proveedor no escribe archivos.
+    def test_el_modulo_no_escribe_archivos(self):
+        import inspect
+
+        import motor_investigacion.proveedor_anthropic as modulo_anthropic
+
+        codigo_fuente = inspect.getsource(modulo_anthropic)
+        for señal_de_escritura in ("write_text(", "open(", "escribir_archivo_atomico"):
+            self.assertNotIn(señal_de_escritura, codigo_fuente)
+
+    def test_respuesta_invalida_no_devuelve_resultado_parcial(self):
+        # Si la validación falla, no debe existir ningún resultado
+        # parcialmente construido: la excepción es la única salida.
+        datos = _datos_respuesta_valida(nivel_confianza="INVALIDO")
+        try:
+            self._investigar_con_respuesta(_respuesta_falsa(json.dumps(datos)))
+            self.fail("Se esperaba ErrorProveedorAnthropic")
+        except ErrorProveedorAnthropic:
+            pass
+
+
 class PruebasProveedorSimuladoSinCambios(unittest.TestCase):
-    """El proveedor simulado no se tocó en la Etapa 6: sigue sin
-    ninguna relación con el sistema de carga de prompts."""
+    """El proveedor simulado no usa el sistema de prompts ni la API, y
+    sigue cumpliendo el mismo contrato genérico (incluyendo los campos
+    agregados en el Paso 4), de forma determinista y sin red."""
 
     def test_proveedor_simulado_no_usa_el_sistema_de_prompts(self):
         import inspect
@@ -293,6 +469,9 @@ class PruebasProveedorSimuladoSinCambios(unittest.TestCase):
         self.assertIn("POI de Prueba", resultado.borrador_master)
         self.assertEqual(len(resultado.fuentes), 1)
         self.assertEqual(resultado.contradicciones_detectadas, [])
+        self.assertIn(resultado.nivel_confianza, ("ALTO", "MEDIO", "BAJO"))
+        self.assertTrue(resultado.observaciones)
+        self.assertEqual(resultado.metadatos_proveedor, MetadatosProveedor(nombre="simulado", modelo="mock-1"))
 
 
 if __name__ == "__main__":

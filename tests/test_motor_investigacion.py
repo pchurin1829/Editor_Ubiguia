@@ -282,7 +282,30 @@ class PruebasMotorAceptaProveedorAnthropicSinCambios(unittest.TestCase):
         os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
 
     def test_ejecutar_investigacion_funciona_con_proveedor_anthropic_mockeado(self):
-        respuesta_falsa = SimpleNamespace(content=[SimpleNamespace(type="text", text="Respuesta de prueba.")])
+        borrador = "# POI de Prueba\n\n" + "\n\n".join(
+            f"## {n}. Sección {n}\n\nContenido de prueba." for n in range(1, 14)
+        )
+        datos_respuesta = {
+            "borrador_markdown": borrador,
+            "fuentes": [
+                {
+                    "titulo": "Fuente de prueba",
+                    "url": "https://ejemplo.invalid/fuente",
+                    "sitio": "Sitio de prueba",
+                    "consultado_en": "2026-07-26T10:00:00",
+                    "secciones_respaldadas": [],
+                    "confianza": "alta",
+                    "notas": "",
+                    "identificador": "src-01",
+                }
+            ],
+            "contradicciones": [],
+            "observaciones": "Sin observaciones.",
+            "nivel_confianza": "MEDIO",
+        }
+        respuesta_falsa = SimpleNamespace(
+            content=[SimpleNamespace(type="text", text=json.dumps(datos_respuesta))]
+        )
         with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
             ClienteFalso.return_value.messages.create.return_value = respuesta_falsa
             datos = motor.ejecutar_investigacion(self.poi_dir, ProveedorInvestigacionAnthropic())

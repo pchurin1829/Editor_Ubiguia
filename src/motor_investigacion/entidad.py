@@ -6,6 +6,11 @@ entidad y los proveedores de investigación.
 """
 from dataclasses import dataclass, field
 
+# Valores permitidos para ResultadoInvestigacion.nivel_confianza, tal como
+# los define el Prompt Maestro de Investigación (sección 3.7 y sección 13,
+# "Control de calidad").
+NIVELES_CONFIANZA_VALIDOS = ("ALTO", "MEDIO", "BAJO")
+
 
 @dataclass
 class ContextoEntidad:
@@ -29,6 +34,7 @@ class FuenteInvestigacion:
     confianza: str = ""
     notas: str = ""
     contradicciones: list[str] = field(default_factory=list)
+    identificador: str = ""
 
     def a_diccionario_json(self, id_fuente: str) -> dict:
         """Convierte al esquema de research.json.sources ya aprobado
@@ -48,10 +54,24 @@ class FuenteInvestigacion:
 
 
 @dataclass
+class MetadatosProveedor:
+    """Identifica qué proveedor y qué modelo produjeron un resultado de
+    investigación. Viaja dentro del propio resultado para que quede
+    trazable de forma autocontenida, independientemente de cómo el Motor
+    haya invocado al proveedor."""
+
+    nombre: str
+    modelo: str
+
+
+@dataclass
 class ResultadoInvestigacion:
     borrador_master: str
     fuentes: list[FuenteInvestigacion] = field(default_factory=list)
     contradicciones_detectadas: list[dict] = field(default_factory=list)
+    observaciones: str = ""
+    nivel_confianza: str = ""
+    metadatos_proveedor: MetadatosProveedor | None = None
 
 
 @dataclass
