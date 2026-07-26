@@ -19,7 +19,7 @@ if str(SRC) not in sys.path:
 from motor_investigacion.prompts import PromptNoEncontradoError, cargar_prompt, listar_prompts  # noqa: E402
 
 ARCHIVOS_PROMPTS_ESPERADOS = (
-    "PROMPT_INVESTIGACION_v1.md",
+    "PROMPT_MAESTRO_INVESTIGACION_v1.0.md",
     "PROMPT_TRADUCCION_ES_EN_v1.md",
     "PROMPT_TRADUCCION_ES_PT_v1.md",
     "PROMPT_AUDIO_v1.md",
@@ -27,15 +27,20 @@ ARCHIVOS_PROMPTS_ESPERADOS = (
 
 
 class PruebasCargarPrompt(unittest.TestCase):
-    def test_carga_correcta_del_prompt_de_investigacion(self):
-        contenido = cargar_prompt("PROMPT_INVESTIGACION_v1.md")
+    def test_carga_correcta_del_prompt_maestro_de_investigacion(self):
+        contenido = cargar_prompt("PROMPT_MAESTRO_INVESTIGACION_v1.0.md")
         self.assertIsInstance(contenido, str)
         self.assertGreater(len(contenido), 0)
-        self.assertIn("Objetivo", contenido)
-        self.assertIn("Alcance", contenido)
-        self.assertIn("Formato esperado", contenido)
-        # Marcador indicando que será desarrollado posteriormente.
-        self.assertIn("todavía no está desarrollado", contenido)
+        self.assertIn("PROMPT MAESTRO DE INVESTIGACIÓN UBIGUIA", contenido)
+        self.assertIn("Investigador", contenido)
+        self.assertIn("FIN DEL PROMPT MAESTRO DE INVESTIGACIÓN UBIGUIA", contenido)
+
+    def test_prompt_de_investigacion_placeholder_ya_no_existe(self):
+        # PROMPT_INVESTIGACION_v1.md era un marcador de infraestructura de
+        # la Etapa 6, retirado en el Paso 2 en favor del Prompt Maestro
+        # aprobado como única fuente operativa.
+        with self.assertRaises(PromptNoEncontradoError):
+            cargar_prompt("PROMPT_INVESTIGACION_v1.md")
 
     def test_carga_correcta_de_los_prompts_reservados(self):
         for nombre in ("PROMPT_TRADUCCION_ES_EN_v1.md", "PROMPT_TRADUCCION_ES_PT_v1.md", "PROMPT_AUDIO_v1.md"):
@@ -58,7 +63,7 @@ class PruebasCargarPrompt(unittest.TestCase):
     def test_lectura_utf8_correcta(self):
         # El archivo real usa acentos y "ñ"; si se leyera con otra
         # codificación, estos caracteres llegarían corruptos.
-        contenido = cargar_prompt("PROMPT_INVESTIGACION_v1.md")
+        contenido = cargar_prompt("PROMPT_MAESTRO_INVESTIGACION_v1.0.md")
         self.assertIn("Investigación", contenido)
         self.assertIn("versión", contenido.lower())
 

@@ -32,7 +32,7 @@ MAX_TOKENS_PRUEBA = 512
 # Nombre del archivo de prompt en Docs/prompts/. No hay ningún prompt
 # de respaldo interno: si el archivo no existe, cargar_prompt() lanza
 # PromptNoEncontradoError (ver _construir_prompt_prueba).
-NOMBRE_PROMPT_INVESTIGACION = "PROMPT_INVESTIGACION_v1.md"
+NOMBRE_PROMPT_INVESTIGACION = "PROMPT_MAESTRO_INVESTIGACION_v1.0.md"
 
 
 class ErrorProveedorAnthropic(Exception):

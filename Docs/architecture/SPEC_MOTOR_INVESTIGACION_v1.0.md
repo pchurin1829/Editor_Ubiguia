@@ -1,4 +1,9 @@
-# SPEC — Motor de Investigación de UBIGUIA v1.0
+# Especificación Técnica
+# Motor de Investigación de UBIGUIA
+
+Versión: 1.0
+
+Estado: APROBADA
 
 | | |
 |---|---|
@@ -14,6 +19,53 @@ No contiene código, clases ni firmas de funciones. Describe contratos de datos,
 **Regla de nomenclatura (permanente, vigente desde esta versión):** los conceptos, módulos, clases, funciones y archivos propios de UBIGUIA se nombran en español. No se traducen nombres impuestos por Python, Tkinter, Anthropic u otras dependencias externas, ni nombres ya existentes del proyecto cuya traducción rompería compatibilidad (por ejemplo `POI_MASTER.md`, `poi.json`, `research.json`, `historial.json`, `fuentes.md`, `TURISMO`, `ANTHROPIC_API_KEY`).
 
 ---
+Este documento constituye la especificación técnica oficial del Motor de Investigación de UBIGUIA.
+
+Describe el comportamiento funcional esperado del sistema, sus responsabilidades, contratos, estados, flujos y reglas de funcionamiento.
+
+No define conceptos del dominio.
+
+Las definiciones conceptuales pertenecen al documento:
+
+MODELO_CONCEPTUAL_MOTOR_INVESTIGACION_v1.0.md
+
+Las decisiones de implementación pertenecen al código fuente.
+
+Toda implementación futura del Motor deberá respetar simultáneamente el Modelo Conceptual y la presente Especificación Técnica.
+
+Ante cualquier contradicción entre ambos documentos prevalecerá el Modelo Conceptual.
+
+
+
+---
+
+# Relación con la Arquitectura
+
+La documentación oficial del Motor de Investigación se organiza de la siguiente manera.
+
+MODELO_CONCEPTUAL_MOTOR_INVESTIGACION_v1.0.md
+
+↓
+
+SPEC_MOTOR_INVESTIGACION_v1.0.md
+
+↓
+
+PROMPT_MAESTRO_INVESTIGACION_v1.0.md
+
+↓
+
+Implementación
+
+Cada documento posee una responsabilidad distinta.
+
+El Modelo Conceptual define el dominio.
+
+La Especificación Técnica define el comportamiento funcional.
+
+El Prompt Maestro define cómo debe comportarse el modelo de Inteligencia Artificial.
+
+La implementación materializa técnicamente esas decisiones.
 
 ## 0. Decisiones fundacionales
 

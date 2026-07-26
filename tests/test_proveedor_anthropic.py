@@ -201,7 +201,7 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
             ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa("ok")
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
 
-        mock_cargar.assert_called_once_with("PROMPT_INVESTIGACION_v1.md")
+        mock_cargar.assert_called_once_with("PROMPT_MAESTRO_INVESTIGACION_v1.0.md")
 
     def test_el_contenido_cargado_llega_completo_al_proveedor(self):
         texto_prompt_de_prueba = "TEXTO_DE_PRUEBA_DEL_PROMPT_CARGADO_98765\ncon varias líneas\ny acentos: ó ñ"
@@ -218,17 +218,61 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
         mensaje_enviado = kwargs["messages"][0]["content"]
         self.assertIn(texto_prompt_de_prueba, mensaje_enviado)
 
+    def test_carga_el_contenido_real_del_prompt_maestro_desde_disco(self):
+        # A diferencia de la prueba anterior, acá no se mockea
+        # cargar_prompt(): se lee el Prompt Maestro real desde
+        # Docs/prompts/ y se verifica que llegue completo a la llamada
+        # (mockeada) de Anthropic. Ninguna llamada de red ocurre.
+        from motor_investigacion.prompts import cargar_prompt as cargar_prompt_real
+
+        contenido_real = cargar_prompt_real("PROMPT_MAESTRO_INVESTIGACION_v1.0.md")
+
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa("ok")
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+
+        _args, kwargs = ClienteFalso.return_value.messages.create.call_args
+        mensaje_enviado = kwargs["messages"][0]["content"]
+        self.assertIn(contenido_real, mensaje_enviado)
+
+    def test_el_proveedor_no_contiene_un_prompt_hardcodeado(self):
+        import inspect
+
+        codigo_fuente = inspect.getsource(ProveedorInvestigacionAnthropic._construir_prompt_prueba)
+        # El único origen de texto instructivo es cargar_prompt(); si
+        # hubiera un prompt de respaldo escrito a mano, contendría
+        # palabras propias del Prompt Maestro (por ejemplo "Investigador").
+        self.assertIn("cargar_prompt", codigo_fuente)
+        self.assertNotIn("Investigador", codigo_fuente)
+
     def test_prompt_faltante_se_traduce_a_error_claro_del_proveedor(self):
         from motor_investigacion.prompts import PromptNoEncontradoError
 
         with mock.patch(
             "motor_investigacion.proveedor_anthropic.cargar_prompt",
-            side_effect=PromptNoEncontradoError("no se encontró PROMPT_INVESTIGACION_v1.md"),
+            side_effect=PromptNoEncontradoError("no se encontró PROMPT_MAESTRO_INVESTIGACION_v1.0.md"),
         ):
             with self.assertRaises(ErrorProveedorAnthropic) as ctx:
                 ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
         self.assertNotIsInstance(ctx.exception, PromptNoEncontradoError)
-        self.assertIn("PROMPT_INVESTIGACION_v1.md", str(ctx.exception))
+        self.assertIn("PROMPT_MAESTRO_INVESTIGACION_v1.0.md", str(ctx.exception))
+
+    def test_prompt_faltante_nunca_llama_a_la_api(self):
+        # Si el Prompt Maestro no se puede cargar, no debe existir ningún
+        # camino alternativo que igual llame a la API con un prompt
+        # interno de respaldo.
+        from motor_investigacion.prompts import PromptNoEncontradoError
+
+        with (
+            mock.patch(
+                "motor_investigacion.proveedor_anthropic.cargar_prompt",
+                side_effect=PromptNoEncontradoError("no se encontró PROMPT_MAESTRO_INVESTIGACION_v1.0.md"),
+            ),
+            mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso,
+        ):
+            with self.assertRaises(ErrorProveedorAnthropic):
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        ClienteFalso.return_value.messages.create.assert_not_called()
 
 
 class PruebasProveedorSimuladoSinCambios(unittest.TestCase):
