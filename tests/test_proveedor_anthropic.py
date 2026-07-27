@@ -132,7 +132,29 @@ class PruebasProveedorAnthropic(unittest.TestCase):
         with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
             ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
-        ClienteFalso.assert_called_once_with(api_key="clave-de-prueba")
+        ClienteFalso.assert_called_once_with(api_key="clave-de-prueba", max_retries=0)
+
+    def test_el_cliente_se_crea_sin_reintentos_automaticos(self):
+        # Paso 5A: la primera validación real queda limitada a una única
+        # solicitud lógica, sin los reintentos automáticos que el SDK
+        # aplica por defecto (max_retries=2).
+        os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        _args, kwargs = ClienteFalso.call_args
+        self.assertEqual(kwargs["max_retries"], 0)
+
+    def test_usa_exactamente_el_modelo_claude_sonnet_5(self):
+        self.assertEqual(DEFAULT_MODEL, "claude-sonnet-5")
+        self.assertEqual(ProveedorInvestigacionAnthropic.modelo, "claude-sonnet-5")
+
+        os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        _args, kwargs = ClienteFalso.return_value.messages.create.call_args
+        self.assertEqual(kwargs["model"], "claude-sonnet-5")
 
     def test_error_de_autenticacion_se_traduce_a_error_claro(self):
         os.environ["ANTHROPIC_API_KEY"] = "clave-invalida"
@@ -413,8 +435,17 @@ class PruebasBusquedaWeb(unittest.TestCase):
         _args, kwargs = ClienteFalso.return_value.messages.create.call_args
         self.assertEqual(
             kwargs["tools"],
-            [{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
+            [{"type": "web_search_20250305", "name": "web_search", "max_uses": 1}],
         )
+
+    def test_la_busqueda_web_queda_limitada_a_un_solo_uso_en_el_paso_5a(self):
+        # Control de costo previo a la primera validación real: como
+        # mucho una búsqueda web por llamada.
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        _args, kwargs = ClienteFalso.return_value.messages.create.call_args
+        self.assertEqual(kwargs["tools"][0]["max_uses"], 1)
 
     def test_procesa_correctamente_una_respuesta_con_resultados_de_busqueda_real(self):
         datos = _datos_respuesta_valida()

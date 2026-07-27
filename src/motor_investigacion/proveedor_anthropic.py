@@ -71,7 +71,7 @@ _cargar_env_local()
 
 # Constante única y fácilmente modificable: el modelo no queda escrito
 # en ningún otro lugar del proveedor.
-DEFAULT_MODEL = "claude-opus-4-8"
+DEFAULT_MODEL = "claude-sonnet-5"
 
 # El borrador estructurado (13 secciones + fuentes + control de calidad)
 # es sustancialmente más largo que la respuesta de prueba de etapas
@@ -96,7 +96,11 @@ CANTIDAD_SECCIONES_OBLIGATORIAS = 13
 # inclusión de respuesta que no se necesitan en esta etapa.
 TIPO_HERRAMIENTA_BUSQUEDA_WEB = "web_search_20250305"
 NOMBRE_HERRAMIENTA_BUSQUEDA_WEB = "web_search"
-MAX_USOS_BUSQUEDA_WEB = 5
+
+# Paso 5A: primera validación real controlada, limitada a una sola
+# búsqueda web como máximo. Se reevaluará en el Paso 5B (investigación
+# completa) si corresponde aumentar este límite.
+MAX_USOS_BUSQUEDA_WEB = 1
 
 # Instrucción técnica de formato de respuesta. No redefine la estructura
 # editorial del Prompt Maestro (esa la define exclusivamente el propio
@@ -231,7 +235,10 @@ class ProveedorInvestigacionAnthropic(ProveedorInvestigacion):
                 "No se encontró la variable de entorno ANTHROPIC_API_KEY. "
                 "Configurala antes de usar el proveedor de Anthropic."
             )
-        return anthropic.Anthropic(api_key=api_key)
+        # max_retries=0: el Paso 5A controla el costo de la primera
+        # validación real limitándola a una única solicitud lógica, sin
+        # los reintentos automáticos que el SDK aplica por defecto.
+        return anthropic.Anthropic(api_key=api_key, max_retries=0)
 
     def _construir_prompt(self, contexto: ContextoEntidad) -> str:
         try:
