@@ -79,6 +79,8 @@ Pendiente únicamente la validación manual definitiva del modal de Categoría.
 
 ✔ Contrato real de salida estructurada (borrador, fuentes, contradicciones, observaciones, nivel de confianza)
 
+✔ Búsqueda web integrada (herramienta oficial `web_search_20250305` del SDK de Anthropic)
+
 ✔ Integración con el Editor
 
 ✔ Suite de pruebas automatizadas
@@ -89,11 +91,11 @@ Motor completamente operativo para la etapa actual.
 
 El Prompt Maestro de Investigación v1.0 (`Docs/prompts/PROMPT_MAESTRO_INVESTIGACION_v1.0.md`) es la única fuente operativa del prompt utilizado por `ProveedorInvestigacionAnthropic`. El placeholder `PROMPT_INVESTIGACION_v1.md` fue retirado.
 
-`ProveedorInvestigacionAnthropic` ya solicita y valida una respuesta estructurada (JSON) del modelo, y queda preparado para recibir investigaciones reales en cuanto se incorpore búsqueda web. La búsqueda web todavía está pendiente: por ahora el modelo responde en base a su conocimiento general, sin consultar fuentes externas.
+`ProveedorInvestigacionAnthropic` ya solicita búsqueda web real (herramienta oficial del SDK) en la misma llamada que genera la respuesta estructurada, y valida los errores propios de esa herramienta. La investigación completa (POI_MASTER definitivo con contenido verificado, contradicciones reales, nivel de confianza calculado a partir de fuentes reales) todavía está pendiente de integración — queda para el Paso 5B.
 
 Total de pruebas automatizadas:
 
-98 pruebas — todas aprobadas.
+103 pruebas — todas aprobadas.
 
 ---
 
@@ -113,7 +115,7 @@ FASE 3 — Motor de Investigación
 
 ## Motor de Investigación
 
-- Implementación de búsqueda web real en `ProveedorInvestigacionAnthropic`.
+- Paso 5B: integrar la búsqueda web ya disponible en una investigación completa (POI_MASTER definitivo, contradicciones reales, nivel de confianza calculado).
 - Validarlo utilizando POIs reales.
 - Ajustar la versión 1.1 del Prompt Maestro si fuera necesario.
 

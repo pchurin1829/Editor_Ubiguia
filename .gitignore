@@ -15,3 +15,4 @@ Editor_UBIGUIA.spec
 payload/
 README.txt
 instalar_ia.bat
+.env.local

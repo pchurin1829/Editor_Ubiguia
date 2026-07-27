@@ -13,14 +13,34 @@ de redacción) la define exclusivamente el Prompt Maestro cargado desde
 disco — este archivo no la redacta ni la reescribe, solo valida que las
 secciones numeradas obligatorias estén presentes.
 
-Todavía no hay búsqueda web real: el modelo responde en base a su
-conocimiento general. Esa capacidad se agrega en una etapa posterior.
+Paso 5A: la misma llamada ahora incluye la herramienta oficial de
+búsqueda web del SDK de Anthropic (`web_search_20250305`, mecanismo
+estable — ver documentación oficial "Web search tool"). Es una
+"server tool": la API ejecuta la búsqueda del lado del servidor dentro
+de la misma llamada a messages.create(), sin que este proveedor tenga
+que orquestar un segundo round-trip. El modelo decide si busca o no; si
+busca, los resultados reales quedan disponibles para que el modelo los
+use al construir el JSON de respuesta (en particular el campo
+"fuentes"). Si la herramienta de búsqueda falla (límite de usos, límite
+de uso general, consulta inválida, etc.), la API igual responde 200 con
+el error embebido en un bloque `web_search_tool_result`; ese caso se
+detecta y se traduce a ErrorProveedorAnthropic antes de intentar
+interpretar el resto de la respuesta.
+
+Todavía no se arma la investigación completa (POI_MASTER definitivo,
+contradicciones reales, nivel de confianza calculado, observaciones
+editoriales reales): ese trabajo de integración queda para una etapa
+posterior. Este paso demuestra que la búsqueda funciona de punta a
+punta y que la respuesta sigue llegando al Motor con la misma
+estructura ya validada.
 """
 import json
 import os
 import re
+from pathlib import Path
 
 import anthropic
+from dotenv import load_dotenv
 
 from motor_investigacion.entidad import (
     NIVELES_CONFIANZA_VALIDOS,
@@ -31,6 +51,23 @@ from motor_investigacion.entidad import (
 )
 from motor_investigacion.prompts import PromptNoEncontradoError, cargar_prompt
 from motor_investigacion.proveedor import ProveedorInvestigacion
+
+# Configuración local: `.env.local` vive en la raíz del proyecto (tres
+# niveles arriba de este archivo: src/motor_investigacion/ -> src/ ->
+# raíz) y está excluido de git (ver .gitignore). Nunca se loguea su
+# ruta ni su contenido.
+_RUTA_ENV_LOCAL = Path(__file__).resolve().parents[2] / ".env.local"
+
+
+def _cargar_env_local() -> None:
+    """Carga variables desde `.env.local` sin pisar las que ya existan
+    en el entorno del proceso (override=False): una variable configurada
+    a nivel de sistema/usuario sigue teniendo prioridad. Si el archivo
+    no existe, no hace nada (no es un error)."""
+    load_dotenv(_RUTA_ENV_LOCAL, override=False)
+
+
+_cargar_env_local()
 
 # Constante única y fácilmente modificable: el modelo no queda escrito
 # en ningún otro lugar del proveedor.
@@ -51,6 +88,15 @@ NOMBRE_PROMPT_INVESTIGACION = "PROMPT_MAESTRO_INVESTIGACION_v1.0.md"
 # (sección 13). Solo se valida la numeración: los títulos y el contenido
 # de cada sección los define el propio Prompt Maestro, no este archivo.
 CANTIDAD_SECCIONES_OBLIGATORIAS = 13
+
+# Herramienta oficial de búsqueda web del SDK de Anthropic (mecanismo
+# estable, no beta: vive en anthropic.types, no en anthropic.types.beta).
+# Se usa la versión básica "web_search_20250305": las versiones más
+# nuevas (20260209, 20260318) agregan filtrado dinámico y control de
+# inclusión de respuesta que no se necesitan en esta etapa.
+TIPO_HERRAMIENTA_BUSQUEDA_WEB = "web_search_20250305"
+NOMBRE_HERRAMIENTA_BUSQUEDA_WEB = "web_search"
+MAX_USOS_BUSQUEDA_WEB = 5
 
 # Instrucción técnica de formato de respuesta. No redefine la estructura
 # editorial del Prompt Maestro (esa la define exclusivamente el propio
@@ -142,6 +188,22 @@ def _validar_respuesta_estructurada(datos) -> None:
         )
 
 
+def _validar_sin_errores_de_busqueda_web(respuesta) -> None:
+    """La herramienta de búsqueda web reporta sus errores (límite de
+    usos, límite de uso general, consulta inválida, etc.) embebidos
+    dentro de un bloque `web_search_tool_result` de una respuesta 200,
+    no como una excepción HTTP. Si eso ocurre, se traduce a
+    ErrorProveedorAnthropic antes de intentar interpretar el resto de
+    la respuesta como el JSON esperado."""
+    for bloque in respuesta.content:
+        if getattr(bloque, "type", None) != "web_search_tool_result":
+            continue
+        contenido = bloque.content
+        codigo_error = getattr(contenido, "error_code", None)
+        if codigo_error:
+            raise ErrorProveedorAnthropic(f"La búsqueda web de Anthropic falló ({codigo_error}).")
+
+
 def _fuente_desde_diccionario(datos_fuente: dict) -> FuenteInvestigacion:
     return FuenteInvestigacion(
         titulo=str(datos_fuente.get("titulo", "")),
@@ -187,6 +249,13 @@ class ProveedorInvestigacionAnthropic(ProveedorInvestigacion):
                 model=self.modelo,
                 max_tokens=MAX_TOKENS_RESPUESTA,
                 messages=[{"role": "user", "content": prompt}],
+                tools=[
+                    {
+                        "type": TIPO_HERRAMIENTA_BUSQUEDA_WEB,
+                        "name": NOMBRE_HERRAMIENTA_BUSQUEDA_WEB,
+                        "max_uses": MAX_USOS_BUSQUEDA_WEB,
+                    }
+                ],
             )
         except anthropic.AuthenticationError as exc:
             raise ErrorProveedorAnthropic(
@@ -211,9 +280,18 @@ class ProveedorInvestigacionAnthropic(ProveedorInvestigacion):
         except anthropic.APIError as exc:
             raise ErrorProveedorAnthropic(f"Error inesperado de la API de Anthropic: {exc}") from exc
 
-        texto_respuesta = "".join(
+        _validar_sin_errores_de_busqueda_web(respuesta)
+
+        # Con la búsqueda web habilitada, Claude puede emitir más de un
+        # bloque de texto (por ejemplo, una narración de "voy a buscar
+        # esto" antes de invocar la herramienta, y recién después la
+        # respuesta final). Solo el ÚLTIMO bloque de texto es la
+        # respuesta al formato JSON pedido; concatenar todos los
+        # bloques de texto rompería el JSON.
+        bloques_de_texto = [
             bloque.text for bloque in respuesta.content if getattr(bloque, "type", None) == "text"
-        ).strip()
+        ]
+        texto_respuesta = bloques_de_texto[-1].strip() if bloques_de_texto else ""
         if not texto_respuesta:
             raise ErrorProveedorAnthropic("La API de Anthropic devolvió una respuesta vacía.")
 

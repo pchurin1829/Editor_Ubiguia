@@ -11,6 +11,7 @@ Ejecutar con:  python -m unittest discover -s tests -v
 import json
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +25,7 @@ import httpx  # noqa: E402
 
 import anthropic  # noqa: E402
 from motor_investigacion import proveedor_activo  # noqa: E402
+from motor_investigacion import proveedor_anthropic  # noqa: E402
 from motor_investigacion.entidad import ContextoEntidad, FuenteInvestigacion, MetadatosProveedor  # noqa: E402
 from motor_investigacion.proveedor import ProveedorInvestigacion  # noqa: E402
 from motor_investigacion.proveedor_anthropic import (  # noqa: E402
@@ -188,6 +190,66 @@ class PruebasProveedorAnthropic(unittest.TestCase):
                 ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
 
 
+class PruebasCargaEnvLocal(unittest.TestCase):
+    """Paso de configuración local: `.env.local` (raíz del proyecto,
+    excluido de git) debe poder proveer ANTHROPIC_API_KEY sin depender
+    de una variable de entorno global. Ninguna prueba de esta clase usa
+    el `.env.local` real del proyecto (que sí puede tener una clave
+    real): cada una apunta `_RUTA_ENV_LOCAL` a un archivo temporal."""
+
+    def setUp(self):
+        self._entorno_previo = dict(os.environ)
+        self.addCleanup(lambda: (os.environ.clear(), os.environ.update(self._entorno_previo)))
+
+    def _apuntar_env_local_a(self, ruta):
+        return mock.patch("motor_investigacion.proveedor_anthropic._RUTA_ENV_LOCAL", ruta)
+
+    def test_carga_la_clave_desde_env_local_cuando_no_esta_en_el_entorno(self):
+        os.environ.pop("ANTHROPIC_API_KEY", None)
+        with tempfile.TemporaryDirectory() as directorio_temporal:
+            ruta_env_local = Path(directorio_temporal) / ".env.local"
+            ruta_env_local.write_text("ANTHROPIC_API_KEY=clave-desde-env-local\n", encoding="utf-8")
+            with self._apuntar_env_local_a(ruta_env_local):
+                proveedor_anthropic._cargar_env_local()
+        self.assertEqual(os.environ.get("ANTHROPIC_API_KEY"), "clave-desde-env-local")
+
+    def test_la_variable_de_entorno_del_proceso_tiene_prioridad_sobre_env_local(self):
+        os.environ["ANTHROPIC_API_KEY"] = "clave-del-entorno"
+        with tempfile.TemporaryDirectory() as directorio_temporal:
+            ruta_env_local = Path(directorio_temporal) / ".env.local"
+            ruta_env_local.write_text("ANTHROPIC_API_KEY=clave-desde-env-local\n", encoding="utf-8")
+            with self._apuntar_env_local_a(ruta_env_local):
+                proveedor_anthropic._cargar_env_local()
+        self.assertEqual(os.environ.get("ANTHROPIC_API_KEY"), "clave-del-entorno")
+
+    def test_sin_clave_en_entorno_ni_en_env_local_mantiene_el_error_claro(self):
+        os.environ.pop("ANTHROPIC_API_KEY", None)
+        with tempfile.TemporaryDirectory() as directorio_temporal:
+            ruta_env_local = Path(directorio_temporal) / ".env.local"  # no existe
+            with self._apuntar_env_local_a(ruta_env_local):
+                proveedor_anthropic._cargar_env_local()
+                with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                    ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertIn("ANTHROPIC_API_KEY", str(ctx.exception))
+
+    def test_env_local_inexistente_no_produce_ningun_error(self):
+        os.environ["ANTHROPIC_API_KEY"] = "clave-del-entorno"
+        with tempfile.TemporaryDirectory() as directorio_temporal:
+            ruta_env_local = Path(directorio_temporal) / ".env.local"  # no existe
+            with self._apuntar_env_local_a(ruta_env_local):
+                proveedor_anthropic._cargar_env_local()  # no debe lanzar
+        self.assertEqual(os.environ.get("ANTHROPIC_API_KEY"), "clave-del-entorno")
+
+    def test_la_clave_nunca_aparece_en_el_mensaje_de_error(self):
+        os.environ["ANTHROPIC_API_KEY"] = "clave-secreta-de-prueba-98765"
+        excepcion = _error_http(anthropic.AuthenticationError, 401, "invalid x-api-key")
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.side_effect = excepcion
+            with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertNotIn("clave-secreta-de-prueba-98765", str(ctx.exception))
+
+
 class PruebasCrearProveedor(unittest.TestCase):
     def test_valor_por_defecto_de_la_constante_es_false(self):
         self.assertFalse(proveedor_activo.USAR_PROVEEDOR_REAL)
@@ -294,6 +356,126 @@ class PruebasProveedorAnthropicUsaSistemaDePrompts(unittest.TestCase):
             with self.assertRaises(ErrorProveedorAnthropic):
                 ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
         ClienteFalso.return_value.messages.create.assert_not_called()
+
+
+class PruebasBusquedaWeb(unittest.TestCase):
+    """Paso 5A: la herramienta oficial de búsqueda web del SDK
+    (`web_search_20250305`) se agrega a la misma llamada de
+    investigar_entidad(). Ninguna prueba de esta clase llama a la API
+    real: el cliente de Anthropic queda mockeado, y las respuestas
+    simuladas replican la forma documentada oficialmente por Anthropic
+    para los bloques `server_tool_use` y `web_search_tool_result`."""
+
+    def setUp(self):
+        self._entorno_previo = dict(os.environ)
+        self.addCleanup(lambda: (os.environ.clear(), os.environ.update(self._entorno_previo)))
+        os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
+
+    def _bloque_server_tool_use(self):
+        return SimpleNamespace(
+            type="server_tool_use",
+            id="srvtoolu_prueba_01",
+            name="web_search",
+            input={"query": "Casa Curutchet La Plata"},
+        )
+
+    def _bloque_busqueda_exitosa(
+        self,
+        url="https://es.wikipedia.org/wiki/Casa_Curutchet",
+        titulo="Casa Curutchet - Wikipedia",
+    ):
+        resultado = SimpleNamespace(
+            type="web_search_result",
+            url=url,
+            title=titulo,
+            encrypted_content="contenido-cifrado-de-prueba",
+            page_age="April 2026",
+        )
+        return SimpleNamespace(
+            type="web_search_tool_result",
+            tool_use_id="srvtoolu_prueba_01",
+            content=[resultado],
+        )
+
+    def _bloque_busqueda_con_error(self, codigo="max_uses_exceeded"):
+        error = SimpleNamespace(type="web_search_tool_result_error", error_code=codigo)
+        return SimpleNamespace(
+            type="web_search_tool_result",
+            tool_use_id="srvtoolu_prueba_02",
+            content=error,
+        )
+
+    def test_la_llamada_incluye_la_herramienta_oficial_de_busqueda_web(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+
+        _args, kwargs = ClienteFalso.return_value.messages.create.call_args
+        self.assertEqual(
+            kwargs["tools"],
+            [{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
+        )
+
+    def test_procesa_correctamente_una_respuesta_con_resultados_de_busqueda_real(self):
+        datos = _datos_respuesta_valida()
+        contenido = [
+            SimpleNamespace(type="text", text="Voy a buscar información sobre este POI."),
+            self._bloque_server_tool_use(),
+            self._bloque_busqueda_exitosa(),
+            SimpleNamespace(type="text", text=json.dumps(datos)),
+        ]
+        respuesta = SimpleNamespace(content=contenido)
+
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = respuesta
+            resultado = ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+
+        # El contrato interno sigue siendo válido: el resultado final es
+        # el mismo ResultadoInvestigacion de siempre, sin importar que
+        # la respuesta haya incluido bloques intermedios de búsqueda
+        # (server_tool_use / web_search_tool_result) antes del texto.
+        self.assertEqual(resultado.borrador_master, datos["borrador_markdown"])
+        self.assertEqual(len(resultado.fuentes), 1)
+        self.assertIsInstance(resultado.fuentes[0], FuenteInvestigacion)
+        self.assertEqual(resultado.metadatos_proveedor, MetadatosProveedor(nombre="anthropic", modelo=DEFAULT_MODEL))
+
+    def test_busqueda_con_error_produce_error_claro(self):
+        contenido = [
+            self._bloque_server_tool_use(),
+            self._bloque_busqueda_con_error("max_uses_exceeded"),
+            SimpleNamespace(type="text", text=json.dumps(_datos_respuesta_valida())),
+        ]
+        respuesta = SimpleNamespace(content=contenido)
+
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = respuesta
+            with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertIn("max_uses_exceeded", str(ctx.exception))
+
+    def test_busqueda_sin_resultados_no_es_tratada_como_error(self):
+        # Según la documentación oficial: una búsqueda que no encuentra
+        # nada devuelve una lista de contenido vacía, no un error. Eso
+        # no debe bloquear el resto del procesamiento.
+        bloque_sin_resultados = SimpleNamespace(
+            type="web_search_tool_result", tool_use_id="srvtoolu_prueba_03", content=[]
+        )
+        datos = _datos_respuesta_valida()
+        contenido = [bloque_sin_resultados, SimpleNamespace(type="text", text=json.dumps(datos))]
+        respuesta = SimpleNamespace(content=contenido)
+
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = respuesta
+            resultado = ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertEqual(resultado.borrador_master, datos["borrador_markdown"])
+
+    def test_ninguna_llamada_alcanza_la_red_real(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        # anthropic.Anthropic queda completamente reemplazado por el
+        # mock: ninguna llamada real puede haber ocurrido.
+        ClienteFalso.assert_called_once()
 
 
 class PruebasRespuestaEstructurada(unittest.TestCase):
