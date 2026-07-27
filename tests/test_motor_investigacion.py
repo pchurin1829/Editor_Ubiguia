@@ -57,6 +57,75 @@ def _crear_poi_de_prueba(base_dir: Path) -> Path:
     return poi_dir
 
 
+class PruebasLecturaPoiJsonConBOM(unittest.TestCase):
+    """`poi.json` de POIs reales del proyecto puede venir guardado con
+    BOM UTF-8 (según el editor usado). `_leer_poi_json()` debe admitir
+    ambos casos y seguir fallando de forma clara ante un JSON inválido.
+    Ninguna prueba de esta clase llama a la API real."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.poi_dir = Path(self._tmp.name) / "01-POI de Prueba BOM"
+        self.poi_dir.mkdir(parents=True, exist_ok=True)
+
+    def _datos_poi_de_prueba(self) -> dict:
+        return {
+            "poi_id": "poi-bom-001",
+            "poi_order": "01",
+            "poi_name": "POI con BOM",
+            "category": "Prueba",
+            "country": "ARGENTINA",
+            "province": "BUENOS AIRES",
+            "city": "CIUDAD DE PRUEBA",
+        }
+
+    def test_lee_poi_json_con_bom_utf8(self):
+        contenido = json.dumps(self._datos_poi_de_prueba(), ensure_ascii=False, indent=4)
+        (self.poi_dir / POI_JSON).write_bytes(b"\xef\xbb\xbf" + contenido.encode("utf-8"))
+
+        datos = adaptador_poi._leer_poi_json(self.poi_dir)
+
+        self.assertEqual(datos["poi_name"], "POI con BOM")
+
+    def test_lee_poi_json_sin_bom_utf8(self):
+        contenido = json.dumps(self._datos_poi_de_prueba(), ensure_ascii=False, indent=4)
+        (self.poi_dir / POI_JSON).write_text(contenido, encoding="utf-8")
+
+        datos = adaptador_poi._leer_poi_json(self.poi_dir)
+
+        self.assertEqual(datos["poi_name"], "POI con BOM")
+
+    def test_json_invalido_conserva_el_error_esperado(self):
+        (self.poi_dir / POI_JSON).write_text("esto no es JSON válido {{{", encoding="utf-8")
+
+        with self.assertRaises(json.JSONDecodeError):
+            adaptador_poi._leer_poi_json(self.poi_dir)
+
+    def test_construir_contexto_para_casa_curutchet_ya_no_falla_por_bom(self):
+        # Casa Curutchet es un POI real del proyecto cuyo poi.json tiene
+        # BOM UTF-8. Esta prueba solo lee archivos existentes (poi.json,
+        # POI_MASTER.md): no escribe nada y no llama a la API real.
+        poi_dir_real = (
+            Path(__file__).resolve().parents[1]
+            / "TURISMO"
+            / "ARGENTINA"
+            / "BUENOS AIRES"
+            / "LA PLATA"
+            / "05-Casa Curutchet"
+        )
+        self.assertTrue(
+            (poi_dir_real / POI_JSON).read_bytes().startswith(b"\xef\xbb\xbf"),
+            "Esta prueba asume que el poi.json real de Casa Curutchet todavía tiene BOM; "
+            "si ya no lo tiene, sigue siendo válido que construir_contexto() no falle.",
+        )
+
+        contexto = adaptador_poi.construir_contexto(poi_dir_real)
+
+        self.assertEqual(contexto.tipo_entidad, "POI")
+        self.assertTrue(contexto.nombre)
+
+
 class PruebasEstados(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()

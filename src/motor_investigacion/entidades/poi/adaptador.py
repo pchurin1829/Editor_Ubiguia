@@ -37,7 +37,10 @@ def _leer_poi_json(poi_dir: Path) -> dict:
     ruta = poi_dir / POI_JSON
     if not ruta.exists():
         return {}
-    return json.loads(ruta.read_text(encoding="utf-8"))
+    # utf-8-sig: varios poi.json reales del proyecto fueron guardados con
+    # BOM UTF-8 (por el editor usado); utf-8-sig lo descarta si está
+    # presente y lee igual de bien archivos sin BOM.
+    return json.loads(ruta.read_text(encoding="utf-8-sig"))
 
 
 def construir_contexto(poi_dir: Path) -> ContextoEntidad:
