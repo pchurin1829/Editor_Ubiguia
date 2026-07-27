@@ -19,6 +19,8 @@ NOMBRE_CARPETA_RESEARCH = "_research"
 ARCHIVO_BORRADOR_MASTER = "POI_MASTER_BORRADOR.md"
 ARCHIVO_FUENTES = "fuentes.md"
 ARCHIVO_OBSERVACIONES = "observaciones.md"
+ARCHIVO_METRICAS = "metricas.json"
+ESQUEMA_METRICAS = "1.0"
 
 
 def ruta_research(poi_dir: Path) -> Path:
@@ -78,6 +80,29 @@ def ruta_fuentes(poi_dir: Path) -> Path:
 
 def ruta_observaciones(poi_dir: Path) -> Path:
     return ruta_research(poi_dir) / ARCHIVO_OBSERVACIONES
+
+
+def ruta_metricas(poi_dir: Path) -> Path:
+    return ruta_research(poi_dir) / ARCHIVO_METRICAS
+
+
+def _leer_metricas_existentes(poi_dir: Path) -> dict:
+    ruta = ruta_metricas(poi_dir)
+    if not ruta.exists():
+        return {"schema_version": ESQUEMA_METRICAS, "intentos": []}
+    return json.loads(ruta.read_text(encoding="utf-8"))
+
+
+def registrar_metricas(poi_dir: Path, metricas) -> None:
+    """Agrega un intento más a metricas.json dentro de _research/, sin
+    sobrescribir los intentos previos (conserva todos, exitosos o no).
+    Escritura atómica (mismo escritor que el resto del Motor) y
+    tolerante a que el archivo todavía no exista o a que _research/
+    todavía no se haya creado."""
+    asegurar_carpeta_research(poi_dir)
+    datos = _leer_metricas_existentes(poi_dir)
+    datos["intentos"].append(metricas.a_diccionario_json())
+    escribir_archivo_atomico(ruta_metricas(poi_dir), json.dumps(datos, ensure_ascii=False, indent=2))
 
 
 def _formatear_fuentes_md(resultado: ResultadoInvestigacion) -> str:

@@ -2,14 +2,27 @@
 
 Sin red, sin credenciales y sin costo — para desarrollo y pruebas del
 Motor de Investigación mientras no exista un proveedor real conectado.
+
+Telemetría: también devuelve una MetricasInvestigacion, pero
+completamente determinista y en cero (no hay ninguna llamada real que
+medir): 0 llamadas a la API, 0 tokens, 0 búsquedas, costo 0. Esto le
+permite al Motor y al adaptador de entidad persistir la telemetría de
+la misma forma sin importar qué proveedor se haya usado.
 """
+import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from motor_investigacion.entidad import (
+    RESULTADO_OK,
     ContextoEntidad,
+    CostosInvestigacion,
     FuenteInvestigacion,
     MetadatosProveedor,
+    MetricasInvestigacion,
     ResultadoInvestigacion,
+    UsoBusquedaWeb,
+    UsoTokens,
 )
 from motor_investigacion.proveedor import ProveedorInvestigacion
 
@@ -57,6 +70,33 @@ class ProveedorInvestigacionSimulado(ProveedorInvestigacion):
             f"- {fuente.titulo} ({fuente.url})\n"
         )
 
+        cero = Decimal("0")
+        metricas = MetricasInvestigacion(
+            id_intento=uuid.uuid4().hex,
+            iniciado_en=ahora,
+            finalizado_en=ahora,
+            duracion_ms=0,
+            proveedor=self.nombre,
+            modelo=self.modelo,
+            resultado=RESULTADO_OK,
+            llamadas_logicas_api=0,
+            reintentos_transporte=0,
+            tokens=UsoTokens(entrada=0, salida=0, cache_escritura=0, cache_lectura=0),
+            busqueda_web=UsoBusquedaWeb(
+                solicitudes_reportadas=0, busquedas_exitosas=0, busquedas_con_error=0, codigos_error=[]
+            ),
+            costos_usd=CostosInvestigacion(
+                tokens_entrada=cero,
+                tokens_salida=cero,
+                cache_escritura=cero,
+                cache_lectura=cero,
+                busqueda_web=cero,
+                total_estimado=cero,
+                costo_completo=True,
+            ),
+            tarifa=None,
+        )
+
         return ResultadoInvestigacion(
             borrador_master=borrador,
             fuentes=[fuente],
@@ -64,4 +104,5 @@ class ProveedorInvestigacionSimulado(ProveedorInvestigacion):
             observaciones="Contenido de prueba generado por ProveedorInvestigacionSimulado. No usar en producción.",
             nivel_confianza="BAJO",
             metadatos_proveedor=MetadatosProveedor(nombre=self.nombre, modelo=self.modelo),
+            metricas=metricas,
         )

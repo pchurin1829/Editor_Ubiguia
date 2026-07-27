@@ -6,7 +6,25 @@ conoce este contrato, nunca su implementación concreta.
 """
 from abc import ABC, abstractmethod
 
-from motor_investigacion.entidad import CandidatoPOI, ContextoEntidad, ResultadoInvestigacion
+from motor_investigacion.entidad import CandidatoPOI, ContextoEntidad, MetricasInvestigacion, ResultadoInvestigacion
+
+
+class ErrorProveedorInvestigacion(Exception):
+    """Error genérico de un Proveedor de Investigación.
+
+    El Motor solo conoce esta clase base — nunca una implementación
+    concreta de proveedor (por ejemplo `ErrorProveedorAnthropic`) — para
+    no romper el aislamiento entre el Motor y el proveedor. Puede llevar
+    adjunta la telemetría del intento fallido (`.metricas`) para que el
+    Motor la persista en `_research/metricas.json` aunque la
+    investigación no haya terminado con éxito. `.metricas` queda en
+    `None` si el proveedor no llegó a recopilar ningún dato."""
+
+    def __init__(self, mensaje: str, *, fase: str | None = None, codigo: str | None = None):
+        super().__init__(mensaje)
+        self.fase = fase
+        self.codigo = codigo
+        self.metricas: MetricasInvestigacion | None = None
 
 
 class ProveedorInvestigacion(ABC):

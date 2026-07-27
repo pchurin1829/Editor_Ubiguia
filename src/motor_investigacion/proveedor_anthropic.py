@@ -27,30 +27,49 @@ el error embebido en un bloque `web_search_tool_result`; ese caso se
 detecta y se traduce a ErrorProveedorAnthropic antes de intentar
 interpretar el resto de la respuesta.
 
-Todavía no se arma la investigación completa (POI_MASTER definitivo,
-contradicciones reales, nivel de confianza calculado, observaciones
-editoriales reales): ese trabajo de integración queda para una etapa
-posterior. Este paso demuestra que la búsqueda funciona de punta a
-punta y que la respuesta sigue llegando al Motor con la misma
-estructura ya validada.
+Paso 5A.2: primera validación real controlada por costo — modelo
+`claude-sonnet-5`, `max_retries=0` (sin reintentos automáticos del SDK)
+y `MAX_USOS_BUSQUEDA_WEB=1` (como mucho una búsqueda por investigación).
+
+Telemetría y costos: cada llamada a investigar_entidad() recopila una
+MetricasInvestigacion (ver entidad.py) — duración, llamadas lógicas,
+tokens, uso de caché, búsquedas web y costo estimado (ver costos.py) —
+tanto si la investigación termina en éxito como si falla en cualquier
+punto (antes de llamar a la API, durante la llamada HTTP, o después de
+recibir una respuesta pero con un error de validación). El proveedor
+nunca escribe esa telemetría a disco: solo la recopila y la adjunta al
+resultado (éxito) o a la excepción (error), para que el Motor sea quien
+decida cómo y dónde persistirla.
 """
 import json
 import os
 import re
+import time
+import uuid
+from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 
 import anthropic
 from dotenv import load_dotenv
 
+from motor_investigacion import costos
 from motor_investigacion.entidad import (
     NIVELES_CONFIANZA_VALIDOS,
+    RESULTADO_ERROR,
+    RESULTADO_OK,
     ContextoEntidad,
+    CostosInvestigacion,
     FuenteInvestigacion,
     MetadatosProveedor,
+    MetricasInvestigacion,
     ResultadoInvestigacion,
+    TarifaModelo,
+    UsoBusquedaWeb,
+    UsoTokens,
 )
 from motor_investigacion.prompts import PromptNoEncontradoError, cargar_prompt
-from motor_investigacion.proveedor import ProveedorInvestigacion
+from motor_investigacion.proveedor import ErrorProveedorInvestigacion, ProveedorInvestigacion
 
 # Configuración local: `.env.local` vive en la raíz del proyecto (tres
 # niveles arriba de este archivo: src/motor_investigacion/ -> src/ ->
@@ -102,6 +121,14 @@ NOMBRE_HERRAMIENTA_BUSQUEDA_WEB = "web_search"
 # completa) si corresponde aumentar este límite.
 MAX_USOS_BUSQUEDA_WEB = 1
 
+# Fases posibles de MetricasInvestigacion.fase_error para este proveedor.
+FASE_ANTES_DE_LLAMAR = "ANTES_DE_LLAMAR"
+FASE_LLAMADA_HTTP = "LLAMADA_HTTP"
+FASE_VALIDACION_BUSQUEDA_WEB = "VALIDACION_BUSQUEDA_WEB"
+FASE_RESPUESTA_VACIA = "RESPUESTA_VACIA"
+FASE_PARSEO_JSON = "PARSEO_JSON"
+FASE_VALIDACION_ESTRUCTURA = "VALIDACION_ESTRUCTURA"
+
 # Instrucción técnica de formato de respuesta. No redefine la estructura
 # editorial del Prompt Maestro (esa la define exclusivamente el propio
 # Prompt Maestro): solo indica el sobre JSON en el que debe viajar.
@@ -121,13 +148,17 @@ Respondé ÚNICAMENTE con un objeto JSON válido, sin texto antes ni después, c
 """
 
 
-class ErrorProveedorAnthropic(Exception):
+class ErrorProveedorAnthropic(ErrorProveedorInvestigacion):
     """Error claro pensado para mostrarse al editor en la UI.
 
     Nunca se debe mostrar un traceback crudo de la API: cualquier error
     de anthropic (autenticación, límite de uso, timeout, conexión,
     HTTP), de formato JSON o de estructura de la respuesta se convierte
-    en una instancia de esta excepción con un mensaje entendible."""
+    en una instancia de esta excepción con un mensaje entendible.
+
+    Hereda de ErrorProveedorInvestigacion (`proveedor.py`): el atributo
+    `.metricas`, cuando se pudo recopilar telemetría del intento antes
+    de fallar, viaja con la excepción para que el Motor la persista."""
 
 
 def _validar_secciones_obligatorias(borrador: str) -> None:
@@ -205,7 +236,11 @@ def _validar_sin_errores_de_busqueda_web(respuesta) -> None:
         contenido = bloque.content
         codigo_error = getattr(contenido, "error_code", None)
         if codigo_error:
-            raise ErrorProveedorAnthropic(f"La búsqueda web de Anthropic falló ({codigo_error}).")
+            raise ErrorProveedorAnthropic(
+                f"La búsqueda web de Anthropic falló ({codigo_error}).",
+                fase=FASE_VALIDACION_BUSQUEDA_WEB,
+                codigo=codigo_error,
+            )
 
 
 def _fuente_desde_diccionario(datos_fuente: dict) -> FuenteInvestigacion:
@@ -219,6 +254,72 @@ def _fuente_desde_diccionario(datos_fuente: dict) -> FuenteInvestigacion:
         notas=str(datos_fuente.get("notas", "")),
         identificador=str(datos_fuente.get("identificador", "")),
     )
+
+
+def _extraer_uso_tokens(respuesta) -> UsoTokens:
+    """Lee los tokens reportados por la API desde `respuesta.usage`
+    (tipo real `anthropic.types.Usage`, verificado contra el SDK
+    instalado: `input_tokens`, `output_tokens`,
+    `cache_creation_input_tokens`, `cache_read_input_tokens`). Si el
+    objeto `usage` no está presente, todos los campos quedan en None."""
+    uso = getattr(respuesta, "usage", None)
+    if uso is None:
+        return UsoTokens()
+    return UsoTokens(
+        entrada=getattr(uso, "input_tokens", None),
+        salida=getattr(uso, "output_tokens", None),
+        cache_escritura=getattr(uso, "cache_creation_input_tokens", None),
+        cache_lectura=getattr(uso, "cache_read_input_tokens", None),
+    )
+
+
+def _extraer_uso_busqueda_web(respuesta) -> UsoBusquedaWeb:
+    """Combina dos fuentes: `respuesta.usage.server_tool_use.web_search_requests`
+    (tipo real `anthropic.types.ServerToolUsage`, verificado contra el
+    SDK instalado) para la cantidad de solicitudes reportadas por la
+    propia API, y los bloques `web_search_tool_result` del contenido
+    para distinguir cuántas terminaron con resultados (facturables)
+    de cuántas terminaron con error (no facturables, según la
+    documentación oficial de Web Search: "If an error occurs during
+    web search, the web search will not be billed")."""
+    uso = getattr(respuesta, "usage", None)
+    uso_herramientas_servidor = getattr(uso, "server_tool_use", None) if uso is not None else None
+    solicitudes_reportadas = (
+        getattr(uso_herramientas_servidor, "web_search_requests", None)
+        if uso_herramientas_servidor is not None
+        else None
+    )
+
+    exitosas = 0
+    con_error = 0
+    codigos_error: list[str] = []
+    for bloque in getattr(respuesta, "content", None) or []:
+        if getattr(bloque, "type", None) != "web_search_tool_result":
+            continue
+        contenido = bloque.content
+        codigo_error = getattr(contenido, "error_code", None)
+        if codigo_error:
+            con_error += 1
+            codigos_error.append(codigo_error)
+        else:
+            exitosas += 1
+
+    return UsoBusquedaWeb(
+        solicitudes_reportadas=solicitudes_reportadas,
+        busquedas_exitosas=exitosas,
+        busquedas_con_error=con_error,
+        codigos_error=codigos_error,
+    )
+
+
+def _codigo_http(excepcion: Exception) -> str | None:
+    """Devuelve el status_code de una excepción del SDK como texto,
+    cuando la excepción lo expone (AuthenticationError, RateLimitError,
+    APIStatusError). Las excepciones puramente de transporte
+    (APITimeoutError, APIConnectionError) no tienen status_code — en
+    ese caso devuelve None en vez de inventar un código."""
+    status_code = getattr(excepcion, "status_code", None)
+    return str(status_code) if status_code is not None else None
 
 
 class ProveedorInvestigacionAnthropic(ProveedorInvestigacion):
@@ -247,9 +348,108 @@ class ProveedorInvestigacionAnthropic(ProveedorInvestigacion):
             raise ErrorProveedorAnthropic(str(exc)) from exc
         return f"{prompt_base}\n\nNombre del POI: {contexto.nombre}{_INSTRUCCION_FORMATO_RESPUESTA}"
 
+    def _construir_metricas(
+        self,
+        *,
+        id_intento: str,
+        iniciado_en: str,
+        inicio_monotonico: float,
+        resultado: str,
+        llamadas: int,
+        fase_error: str | None = None,
+        codigo_error: str | None = None,
+        mensaje_error: str | None = None,
+        tokens: UsoTokens | None = None,
+        busqueda_web: UsoBusquedaWeb | None = None,
+        modelo_reportado: str | None = None,
+        stop_reason: str | None = None,
+    ) -> MetricasInvestigacion:
+        finalizado_en = datetime.now().isoformat(timespec="seconds")
+        duracion_ms = int((time.monotonic() - inicio_monotonico) * 1000)
+        modelo_para_costo = modelo_reportado or self.modelo
+
+        if fase_error == FASE_ANTES_DE_LLAMAR:
+            # Ninguna llamada llegó a hacerse: el costo es exactamente
+            # cero para los cinco componentes, no un dato faltante — no
+            # hay nada que estimar ni ninguna incertidumbre que marcar
+            # como parcial.
+            cero = Decimal("0")
+            tokens_final = UsoTokens(entrada=0, salida=0, cache_escritura=0, cache_lectura=0)
+            busqueda_web_final = UsoBusquedaWeb(
+                solicitudes_reportadas=0, busquedas_exitosas=0, busquedas_con_error=0, codigos_error=[]
+            )
+            costos_final = CostosInvestigacion(
+                tokens_entrada=cero,
+                tokens_salida=cero,
+                cache_escritura=cero,
+                cache_lectura=cero,
+                busqueda_web=cero,
+                total_estimado=cero,
+                costo_completo=True,
+            )
+            tarifa = None
+        else:
+            tokens_final = tokens if tokens is not None else UsoTokens()
+            busqueda_web_final = busqueda_web if busqueda_web is not None else UsoBusquedaWeb()
+            try:
+                tarifa_configurada = costos.obtener_tarifa(modelo_para_costo)
+            except costos.TarifaNoDisponibleError:
+                tarifa_configurada = None
+            if tarifa_configurada is None:
+                costos_final = CostosInvestigacion()
+                tarifa = None
+            else:
+                costos_final = costos.calcular_costos(tokens_final, busqueda_web_final, tarifa_configurada)
+                tarifa = TarifaModelo(
+                    moneda=tarifa_configurada.moneda,
+                    modelo=tarifa_configurada.modelo,
+                    vigente_desde=tarifa_configurada.vigente_desde,
+                    fuente=tarifa_configurada.fuente,
+                )
+
+        return MetricasInvestigacion(
+            id_intento=id_intento,
+            iniciado_en=iniciado_en,
+            finalizado_en=finalizado_en,
+            duracion_ms=duracion_ms,
+            proveedor=self.nombre,
+            modelo=modelo_para_costo,
+            resultado=resultado,
+            fase_error=fase_error,
+            codigo_error=codigo_error,
+            mensaje_error=mensaje_error,
+            llamadas_logicas_api=llamadas,
+            reintentos_transporte=0,
+            stop_reason=stop_reason,
+            tokens=tokens_final,
+            busqueda_web=busqueda_web_final,
+            costos_usd=costos_final,
+            tarifa=tarifa,
+        )
+
     def investigar_entidad(self, contexto: ContextoEntidad) -> ResultadoInvestigacion:
-        cliente = self._crear_cliente()
-        prompt = self._construir_prompt(contexto)
+        id_intento = uuid.uuid4().hex
+        inicio_monotonico = time.monotonic()
+        iniciado_en = datetime.now().isoformat(timespec="seconds")
+
+        def _metricas(resultado: str, llamadas: int, **kwargs) -> MetricasInvestigacion:
+            return self._construir_metricas(
+                id_intento=id_intento,
+                iniciado_en=iniciado_en,
+                inicio_monotonico=inicio_monotonico,
+                resultado=resultado,
+                llamadas=llamadas,
+                **kwargs,
+            )
+
+        try:
+            cliente = self._crear_cliente()
+            prompt = self._construir_prompt(contexto)
+        except ErrorProveedorAnthropic as exc:
+            exc.metricas = _metricas(
+                RESULTADO_ERROR, 0, fase_error=FASE_ANTES_DE_LLAMAR, mensaje_error=str(exc)
+            )
+            raise
 
         try:
             respuesta = cliente.messages.create(
@@ -265,51 +465,111 @@ class ProveedorInvestigacionAnthropic(ProveedorInvestigacion):
                 ],
             )
         except anthropic.AuthenticationError as exc:
-            raise ErrorProveedorAnthropic(
-                "La API Key de Anthropic no es válida (error de autenticación)."
-            ) from exc
+            error = ErrorProveedorAnthropic("La API Key de Anthropic no es válida (error de autenticación).")
+            error.metricas = _metricas(
+                RESULTADO_ERROR, 1, fase_error=FASE_LLAMADA_HTTP,
+                codigo_error=_codigo_http(exc), mensaje_error=str(error),
+            )
+            raise error from exc
         except anthropic.RateLimitError as exc:
-            raise ErrorProveedorAnthropic(
+            error = ErrorProveedorAnthropic(
                 "Se alcanzó el límite de uso de la API de Anthropic. Intentá de nuevo más tarde."
-            ) from exc
+            )
+            error.metricas = _metricas(
+                RESULTADO_ERROR, 1, fase_error=FASE_LLAMADA_HTTP,
+                codigo_error=_codigo_http(exc), mensaje_error=str(error),
+            )
+            raise error from exc
         except anthropic.APITimeoutError as exc:
-            raise ErrorProveedorAnthropic(
-                "La API de Anthropic no respondió a tiempo (timeout)."
-            ) from exc
+            error = ErrorProveedorAnthropic("La API de Anthropic no respondió a tiempo (timeout).")
+            error.metricas = _metricas(
+                RESULTADO_ERROR, 1, fase_error=FASE_LLAMADA_HTTP,
+                codigo_error=_codigo_http(exc), mensaje_error=str(error),
+            )
+            raise error from exc
         except anthropic.APIConnectionError as exc:
-            raise ErrorProveedorAnthropic(
+            error = ErrorProveedorAnthropic(
                 "No se pudo conectar con la API de Anthropic. Verificá la conexión a Internet."
-            ) from exc
+            )
+            error.metricas = _metricas(
+                RESULTADO_ERROR, 1, fase_error=FASE_LLAMADA_HTTP,
+                codigo_error=_codigo_http(exc), mensaje_error=str(error),
+            )
+            raise error from exc
         except anthropic.APIStatusError as exc:
-            raise ErrorProveedorAnthropic(
-                f"La API de Anthropic devolvió un error HTTP ({exc.status_code})."
-            ) from exc
+            error = ErrorProveedorAnthropic(f"La API de Anthropic devolvió un error HTTP ({exc.status_code}).")
+            error.metricas = _metricas(
+                RESULTADO_ERROR, 1, fase_error=FASE_LLAMADA_HTTP,
+                codigo_error=_codigo_http(exc), mensaje_error=str(error),
+            )
+            raise error from exc
         except anthropic.APIError as exc:
-            raise ErrorProveedorAnthropic(f"Error inesperado de la API de Anthropic: {exc}") from exc
+            error = ErrorProveedorAnthropic(f"Error inesperado de la API de Anthropic: {exc}")
+            error.metricas = _metricas(
+                RESULTADO_ERROR, 1, fase_error=FASE_LLAMADA_HTTP,
+                codigo_error=_codigo_http(exc), mensaje_error=str(error),
+            )
+            raise error from exc
 
-        _validar_sin_errores_de_busqueda_web(respuesta)
-
-        # Con la búsqueda web habilitada, Claude puede emitir más de un
-        # bloque de texto (por ejemplo, una narración de "voy a buscar
-        # esto" antes de invocar la herramienta, y recién después la
-        # respuesta final). Solo el ÚLTIMO bloque de texto es la
-        # respuesta al formato JSON pedido; concatenar todos los
-        # bloques de texto rompería el JSON.
-        bloques_de_texto = [
-            bloque.text for bloque in respuesta.content if getattr(bloque, "type", None) == "text"
-        ]
-        texto_respuesta = bloques_de_texto[-1].strip() if bloques_de_texto else ""
-        if not texto_respuesta:
-            raise ErrorProveedorAnthropic("La API de Anthropic devolvió una respuesta vacía.")
+        # A partir de acá hubo una respuesta facturable de la API: se
+        # recopila el uso ANTES de validar, para que quede disponible
+        # incluso si la validación posterior falla (por ejemplo,
+        # max_uses_exceeded, JSON inválido o estructura inválida).
+        tokens = _extraer_uso_tokens(respuesta)
+        busqueda_web = _extraer_uso_busqueda_web(respuesta)
+        modelo_reportado = getattr(respuesta, "model", None) or self.modelo
+        stop_reason = getattr(respuesta, "stop_reason", None)
 
         try:
-            datos = json.loads(texto_respuesta)
-        except json.JSONDecodeError as exc:
-            raise ErrorProveedorAnthropic("La respuesta de la API de Anthropic no es un JSON válido.") from exc
+            _validar_sin_errores_de_busqueda_web(respuesta)
 
-        _validar_respuesta_estructurada(datos)
+            # Con la búsqueda web habilitada, Claude puede emitir más de
+            # un bloque de texto (por ejemplo, una narración de "voy a
+            # buscar esto" antes de invocar la herramienta, y recién
+            # después la respuesta final). Solo el ÚLTIMO bloque de
+            # texto es la respuesta al formato JSON pedido; concatenar
+            # todos los bloques de texto rompería el JSON.
+            bloques_de_texto = [
+                bloque.text for bloque in respuesta.content if getattr(bloque, "type", None) == "text"
+            ]
+            texto_respuesta = bloques_de_texto[-1].strip() if bloques_de_texto else ""
+            if not texto_respuesta:
+                raise ErrorProveedorAnthropic(
+                    "La API de Anthropic devolvió una respuesta vacía.", fase=FASE_RESPUESTA_VACIA
+                )
 
-        return self._resultado_desde_respuesta(datos)
+            try:
+                datos = json.loads(texto_respuesta)
+            except json.JSONDecodeError as exc:
+                raise ErrorProveedorAnthropic(
+                    "La respuesta de la API de Anthropic no es un JSON válido.", fase=FASE_PARSEO_JSON
+                ) from exc
+
+            _validar_respuesta_estructurada(datos)
+        except ErrorProveedorAnthropic as exc:
+            exc.metricas = _metricas(
+                RESULTADO_ERROR,
+                1,
+                fase_error=exc.fase or FASE_VALIDACION_ESTRUCTURA,
+                codigo_error=exc.codigo,
+                mensaje_error=str(exc),
+                tokens=tokens,
+                busqueda_web=busqueda_web,
+                modelo_reportado=modelo_reportado,
+                stop_reason=stop_reason,
+            )
+            raise
+
+        resultado = self._resultado_desde_respuesta(datos)
+        resultado.metricas = _metricas(
+            RESULTADO_OK,
+            1,
+            tokens=tokens,
+            busqueda_web=busqueda_web,
+            modelo_reportado=modelo_reportado,
+            stop_reason=stop_reason,
+        )
+        return resultado
 
     def _resultado_desde_respuesta(self, datos: dict) -> ResultadoInvestigacion:
         return ResultadoInvestigacion(

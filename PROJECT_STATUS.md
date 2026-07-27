@@ -83,6 +83,8 @@ Pendiente únicamente la validación manual definitiva del modal de Categoría.
 
 ✔ Integración con el Editor
 
+✔ Telemetría y costos por intento de investigación
+
 ✔ Suite de pruebas automatizadas
 
 ## Estado actual
@@ -93,9 +95,11 @@ El Prompt Maestro de Investigación v1.0 (`Docs/prompts/PROMPT_MAESTRO_INVESTIGA
 
 `ProveedorInvestigacionAnthropic` ya solicita búsqueda web real (herramienta oficial del SDK) en la misma llamada que genera la respuesta estructurada, y valida los errores propios de esa herramienta. La investigación completa (POI_MASTER definitivo con contenido verificado, contradicciones reales, nivel de confianza calculado a partir de fuentes reales) todavía está pendiente de integración — queda para el Paso 5B.
 
+Cada intento de investigación (exitoso o fallido, en cualquier fase) genera una `MetricasInvestigacion` — modelo, duración, llamadas lógicas a la API, tokens de entrada/salida/caché, uso de Web Search y costo estimado (`src/motor_investigacion/costos.py`, tarifas oficiales versionadas, cálculo con `Decimal`) — que el Motor persiste en `_research/metricas.json` (acumulativo, escritura atómica), tanto en éxito como en error (`ANTES_DE_LLAMAR`, `LLAMADA_HTTP`, `VALIDACION_BUSQUEDA_WEB`, `RESPUESTA_VACIA`, `PARSEO_JSON`, `VALIDACION_ESTRUCTURA`). El proveedor simulado reporta la misma telemetría con costo determinístico en cero. La validación real contra la API todavía está pendiente — el intento controlado anterior (Paso 5A.2) terminó en `max_uses_exceeded` antes de completarse.
+
 Total de pruebas automatizadas:
 
-103 pruebas — todas aprobadas.
+143 pruebas — todas aprobadas.
 
 ---
 
@@ -115,6 +119,7 @@ FASE 3 — Motor de Investigación
 
 ## Motor de Investigación
 
+- Repetir la validación real controlada de Casa Curutchet (única llamada, con telemetría y costo ahora registrados en `_research/metricas.json`).
 - Paso 5B: integrar la búsqueda web ya disponible en una investigación completa (POI_MASTER definitivo, contradicciones reales, nivel de confianza calculado).
 - Validarlo utilizando POIs reales.
 - Ajustar la versión 1.1 del Prompt Maestro si fuera necesario.

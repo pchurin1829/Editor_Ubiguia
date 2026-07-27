@@ -25,9 +25,52 @@ if str(SRC) not in sys.path:
 from constants import POI_JSON, POI_MASTER_FILE  # noqa: E402
 from motor_investigacion import estados  # noqa: E402
 from motor_investigacion import motor  # noqa: E402
+from motor_investigacion.entidad import (  # noqa: E402
+    RESULTADO_ERROR,
+    CostosInvestigacion,
+    MetricasInvestigacion,
+    UsoBusquedaWeb,
+    UsoTokens,
+)
 from motor_investigacion.entidades.poi import adaptador as adaptador_poi  # noqa: E402
+from motor_investigacion.proveedor import ErrorProveedorInvestigacion, ProveedorInvestigacion  # noqa: E402
 from motor_investigacion.proveedor_anthropic import ProveedorInvestigacionAnthropic  # noqa: E402
 from motor_investigacion.proveedor_simulado import ProveedorInvestigacionSimulado  # noqa: E402
+
+
+class _ProveedorFallidoDePrueba(ProveedorInvestigacion):
+    """Doble de prueba, agnóstico de Anthropic: siempre falla con una
+    ErrorProveedorInvestigacion que ya trae su propia telemetría
+    adjunta, para probar que el Motor la persiste sin conocer nada
+    específico de ningún proveedor concreto."""
+
+    nombre = "fallido-prueba"
+    modelo = "modelo-prueba"
+
+    def investigar_entidad(self, contexto):
+        error = ErrorProveedorInvestigacion(
+            "Fallo simulado de prueba.", fase="FASE_DE_PRUEBA", codigo="CODIGO_DE_PRUEBA"
+        )
+        error.metricas = MetricasInvestigacion(
+            id_intento="intento-prueba-001",
+            iniciado_en="2026-01-01T00:00:00",
+            finalizado_en="2026-01-01T00:00:01",
+            duracion_ms=1000,
+            proveedor=self.nombre,
+            modelo=self.modelo,
+            resultado=RESULTADO_ERROR,
+            fase_error="FASE_DE_PRUEBA",
+            codigo_error="CODIGO_DE_PRUEBA",
+            mensaje_error="Fallo simulado de prueba.",
+            llamadas_logicas_api=1,
+            reintentos_transporte=0,
+            tokens=UsoTokens(entrada=10, salida=0, cache_escritura=0, cache_lectura=0),
+            busqueda_web=UsoBusquedaWeb(
+                solicitudes_reportadas=0, busquedas_exitosas=0, busquedas_con_error=0, codigos_error=[]
+            ),
+            costos_usd=CostosInvestigacion(),
+        )
+        raise error
 
 
 def _crear_poi_de_prueba(base_dir: Path) -> Path:
@@ -387,6 +430,139 @@ class PruebasMotorAceptaProveedorAnthropicSinCambios(unittest.TestCase):
         self.assertTrue((carpeta / "research.json").exists())
         self.assertTrue((carpeta / "POI_MASTER_BORRADOR.md").exists())
         self.assertTrue((carpeta / "fuentes.md").exists())
+
+
+class PruebasTelemetriaMetricasJson(unittest.TestCase):
+    """Telemetría y costos: metricas.json dentro de _research/ conserva
+    todos los intentos (exitosos o fallidos), es acumulativo, atómico,
+    y no depende de ningún proveedor concreto. Ninguna prueba llama a
+    la API real de Anthropic."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.poi_dir = _crear_poi_de_prueba(Path(self._tmp.name))
+        self.master_original = (self.poi_dir / POI_MASTER_FILE).read_text(encoding="utf-8")
+
+    def _leer_metricas(self) -> dict:
+        return json.loads(adaptador_poi.ruta_metricas(self.poi_dir).read_text(encoding="utf-8"))
+
+    # 2 y 13: métricas persistidas en metricas.json, con costo cero para
+    # el proveedor simulado.
+    def test_metricas_se_persisten_en_metricas_json_con_proveedor_simulado(self):
+        motor.ejecutar_investigacion(self.poi_dir, ProveedorInvestigacionSimulado())
+
+        self.assertTrue(adaptador_poi.ruta_metricas(self.poi_dir).exists())
+        datos = self._leer_metricas()
+        self.assertEqual(datos["schema_version"], "1.0")
+        self.assertEqual(len(datos["intentos"]), 1)
+
+        intento = datos["intentos"][0]
+        self.assertEqual(intento["resultado"], "OK")
+        self.assertEqual(intento["proveedor"], "simulado")
+        self.assertEqual(intento["llamadas_logicas_api"], 0)
+        self.assertEqual(intento["tokens"]["entrada"], 0)
+        self.assertEqual(intento["costos_usd"]["total_estimado"], "0")
+        self.assertTrue(intento["costos_usd"]["costo_completo"])
+
+    # 3: varios intentos se acumulan y no se sobrescriben.
+    def test_varios_intentos_se_acumulan_sin_sobrescribirse(self):
+        carpeta_research = adaptador_poi.asegurar_carpeta_research(self.poi_dir)
+
+        def _metricas_de_prueba(id_intento: str, resultado: str) -> MetricasInvestigacion:
+            return MetricasInvestigacion(
+                id_intento=id_intento,
+                iniciado_en="2026-01-01T00:00:00",
+                finalizado_en="2026-01-01T00:00:01",
+                duracion_ms=100,
+                proveedor="prueba",
+                modelo="modelo-prueba",
+                resultado=resultado,
+                tokens=UsoTokens(),
+                busqueda_web=UsoBusquedaWeb(),
+                costos_usd=CostosInvestigacion(),
+            )
+
+        adaptador_poi.registrar_metricas(self.poi_dir, _metricas_de_prueba("intento-01", "ERROR"))
+        adaptador_poi.registrar_metricas(self.poi_dir, _metricas_de_prueba("intento-02", "ERROR"))
+        adaptador_poi.registrar_metricas(self.poi_dir, _metricas_de_prueba("intento-03", "OK"))
+
+        datos = self._leer_metricas()
+        self.assertEqual(len(datos["intentos"]), 3)
+        self.assertEqual([i["id_intento"] for i in datos["intentos"]], ["intento-01", "intento-02", "intento-03"])
+        self.assertEqual(estados.leer_estado(carpeta_research), None)  # no interfiere con research.json
+
+    # 17: compatibilidad con _research/ sin metricas.json todavía.
+    def test_registrar_metricas_tolera_que_el_archivo_no_exista_todavia(self):
+        self.assertFalse(adaptador_poi.ruta_metricas(self.poi_dir).exists())
+        adaptador_poi.registrar_metricas(
+            self.poi_dir,
+            MetricasInvestigacion(
+                id_intento="intento-01",
+                iniciado_en="2026-01-01T00:00:00",
+                finalizado_en="2026-01-01T00:00:01",
+                duracion_ms=0,
+                proveedor="prueba",
+                modelo="modelo-prueba",
+                resultado="OK",
+            ),
+        )
+        datos = self._leer_metricas()
+        self.assertEqual(len(datos["intentos"]), 1)
+
+    # 18: escritura atómica (mismo escritor que research.json/historial.json).
+    def test_escritura_de_metricas_no_deja_archivos_temporales(self):
+        motor.ejecutar_investigacion(self.poi_dir, ProveedorInvestigacionSimulado())
+        ruta = adaptador_poi.ruta_metricas(self.poi_dir)
+        temporales = list(ruta.parent.glob(f".{ruta.name}.*"))
+        self.assertEqual(temporales, [])
+
+    # 16: la telemetría no modifica POI_MASTER.md.
+    def test_registrar_metricas_no_modifica_poi_master(self):
+        motor.ejecutar_investigacion(self.poi_dir, ProveedorInvestigacionSimulado())
+        master_actual = (self.poi_dir / POI_MASTER_FILE).read_text(encoding="utf-8")
+        self.assertEqual(master_actual, self.master_original)
+
+    # 9: error posterior a una respuesta facturable guarda métricas —
+    # a nivel Motor, usando un proveedor de prueba agnóstico de
+    # Anthropic para demostrar que el Motor solo conoce
+    # ErrorProveedorInvestigacion (la clase base), nunca una
+    # implementación concreta.
+    def test_investigacion_fallida_persiste_su_telemetria(self):
+        with self.assertRaises(ErrorProveedorInvestigacion):
+            motor.ejecutar_investigacion(self.poi_dir, _ProveedorFallidoDePrueba())
+
+        self.assertTrue(adaptador_poi.ruta_metricas(self.poi_dir).exists())
+        datos = self._leer_metricas()
+        self.assertEqual(len(datos["intentos"]), 1)
+        intento = datos["intentos"][0]
+        self.assertEqual(intento["resultado"], "ERROR")
+        self.assertEqual(intento["fase_error"], "FASE_DE_PRUEBA")
+        self.assertEqual(intento["codigo_error"], "CODIGO_DE_PRUEBA")
+        self.assertEqual(intento["proveedor"], "fallido-prueba")
+
+        # La investigación fallida nunca llegó a EN_REVISION ni tocó
+        # POI_MASTER.md.
+        carpeta_research = adaptador_poi.ruta_research(self.poi_dir)
+        self.assertEqual(estados.leer_estado(carpeta_research)["state"], estados.BORRADOR)
+        master_actual = (self.poi_dir / POI_MASTER_FILE).read_text(encoding="utf-8")
+        self.assertEqual(master_actual, self.master_original)
+
+    def test_investigacion_fallida_sin_metricas_no_falla_al_no_persistir_nada(self):
+        # Si un proveedor no llegó a recopilar ninguna métrica
+        # (.metricas es None), el Motor no debe fallar al intentar
+        # persistir un None: simplemente no escribe metricas.json.
+        class _ProveedorFallidoSinMetricas(ProveedorInvestigacion):
+            nombre = "fallido-sin-metricas"
+            modelo = "modelo-prueba"
+
+            def investigar_entidad(self, contexto):
+                raise ErrorProveedorInvestigacion("Fallo sin telemetría recopilada.")
+
+        with self.assertRaises(ErrorProveedorInvestigacion):
+            motor.ejecutar_investigacion(self.poi_dir, _ProveedorFallidoSinMetricas())
+
+        self.assertFalse(adaptador_poi.ruta_metricas(self.poi_dir).exists())
 
 
 if __name__ == "__main__":

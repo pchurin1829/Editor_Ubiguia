@@ -13,6 +13,7 @@ import os
 import sys
 import tempfile
 import unittest
+from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -24,9 +25,15 @@ if str(SRC) not in sys.path:
 import httpx  # noqa: E402
 
 import anthropic  # noqa: E402
+from motor_investigacion import costos  # noqa: E402
 from motor_investigacion import proveedor_activo  # noqa: E402
 from motor_investigacion import proveedor_anthropic  # noqa: E402
-from motor_investigacion.entidad import ContextoEntidad, FuenteInvestigacion, MetadatosProveedor  # noqa: E402
+from motor_investigacion.entidad import (  # noqa: E402
+    ContextoEntidad,
+    FuenteInvestigacion,
+    MetadatosProveedor,
+    UsoTokens,
+)
 from motor_investigacion.proveedor import ProveedorInvestigacion  # noqa: E402
 from motor_investigacion.proveedor_anthropic import (  # noqa: E402
     DEFAULT_MODEL,
@@ -685,6 +692,256 @@ class PruebasProveedorSimuladoSinCambios(unittest.TestCase):
         self.assertIn(resultado.nivel_confianza, ("ALTO", "MEDIO", "BAJO"))
         self.assertTrue(resultado.observaciones)
         self.assertEqual(resultado.metadatos_proveedor, MetadatosProveedor(nombre="simulado", modelo="mock-1"))
+
+
+def _uso_de_prueba(entrada=100, salida=200, cache_escritura=0, cache_lectura=0, solicitudes_busqueda=1):
+    server_tool_use = SimpleNamespace(web_search_requests=solicitudes_busqueda, web_fetch_requests=0)
+    return SimpleNamespace(
+        input_tokens=entrada,
+        output_tokens=salida,
+        cache_creation_input_tokens=cache_escritura,
+        cache_read_input_tokens=cache_lectura,
+        server_tool_use=server_tool_use,
+    )
+
+
+def _bloque_busqueda_exitosa(tool_use_id="srvtoolu_01"):
+    resultado = SimpleNamespace(
+        type="web_search_result",
+        url="https://es.wikipedia.org/wiki/Casa_Curutchet",
+        title="Casa Curutchet - Wikipedia",
+        encrypted_content="contenido-cifrado-de-prueba",
+        page_age="April 2026",
+    )
+    return SimpleNamespace(type="web_search_tool_result", tool_use_id=tool_use_id, content=[resultado])
+
+
+def _bloque_busqueda_con_error(codigo="max_uses_exceeded", tool_use_id="srvtoolu_02"):
+    error = SimpleNamespace(type="web_search_tool_result_error", error_code=codigo)
+    return SimpleNamespace(type="web_search_tool_result", tool_use_id=tool_use_id, content=error)
+
+
+def _respuesta_exitosa_con_uso(usage=None, bloques_busqueda=(), stop_reason="end_turn", modelo="claude-sonnet-5"):
+    datos = _datos_respuesta_valida()
+    contenido = list(bloques_busqueda) + [SimpleNamespace(type="text", text=json.dumps(datos))]
+    return SimpleNamespace(content=contenido, usage=usage or _uso_de_prueba(), model=modelo, stop_reason=stop_reason)
+
+
+class PruebasTelemetria(unittest.TestCase):
+    """Telemetría y costos: cada intento (exitoso o fallido) recopila una
+    MetricasInvestigacion. Ninguna prueba de esta clase llama a la API
+    real de Anthropic ni consulta saldo."""
+
+    def setUp(self):
+        self._entorno_previo = dict(os.environ)
+        self.addCleanup(lambda: (os.environ.clear(), os.environ.update(self._entorno_previo)))
+        os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
+
+    def _investigar_con_respuesta(self, respuesta):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = respuesta
+            return ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+
+    # 1: investigación exitosa -> métricas completas.
+    def test_metricas_completas_en_investigacion_exitosa(self):
+        uso = _uso_de_prueba(entrada=1000, salida=500, cache_escritura=200, cache_lectura=300, solicitudes_busqueda=1)
+        respuesta = _respuesta_exitosa_con_uso(usage=uso, bloques_busqueda=[_bloque_busqueda_exitosa()])
+
+        resultado = self._investigar_con_respuesta(respuesta)
+
+        metricas = resultado.metricas
+        self.assertIsNotNone(metricas)
+        self.assertEqual(metricas.resultado, "OK")
+        self.assertEqual(metricas.proveedor, "anthropic")
+        self.assertEqual(metricas.modelo, "claude-sonnet-5")
+        self.assertEqual(metricas.llamadas_logicas_api, 1)
+        self.assertEqual(metricas.reintentos_transporte, 0)
+        self.assertIsNone(metricas.fase_error)
+        self.assertIsNone(metricas.codigo_error)
+        self.assertIsNone(metricas.mensaje_error)
+        self.assertGreaterEqual(metricas.duracion_ms, 0)
+        self.assertEqual(metricas.stop_reason, "end_turn")
+        # Tokens de entrada y salida se conservan (prueba 4 de la lista).
+        self.assertEqual(metricas.tokens.entrada, 1000)
+        self.assertEqual(metricas.tokens.salida, 500)
+        # Métricas de caché se conservan (prueba 5).
+        self.assertEqual(metricas.tokens.cache_escritura, 200)
+        self.assertEqual(metricas.tokens.cache_lectura, 300)
+        # Búsquedas exitosas se cuentan (prueba 6).
+        self.assertEqual(metricas.busqueda_web.busquedas_exitosas, 1)
+        self.assertEqual(metricas.busqueda_web.busquedas_con_error, 0)
+        self.assertEqual(metricas.busqueda_web.solicitudes_reportadas, 1)
+        # Costo calculado correctamente con Decimal (prueba 11).
+        self.assertIsInstance(metricas.costos_usd.total_estimado, Decimal)
+        self.assertTrue(metricas.costos_usd.costo_completo)
+        self.assertIsNotNone(metricas.tarifa)
+        self.assertEqual(metricas.tarifa.modelo, "claude-sonnet-5")
+
+    def test_busquedas_fallidas_no_se_facturan(self):
+        # Unidad directa sobre el extractor de métricas: una respuesta
+        # real nunca llega a esta mezcla (cualquier bloque de búsqueda
+        # con error hace fallar toda la investigación, ver
+        # test_max_uses_exceeded_conserva_metricas_disponibles), pero el
+        # conteo de "cuántas búsquedas fueron exitosas vs. con error"
+        # debe ser correcto de forma independiente a esa validación.
+        respuesta = SimpleNamespace(
+            content=[_bloque_busqueda_exitosa(), _bloque_busqueda_con_error("query_too_long")],
+            usage=_uso_de_prueba(solicitudes_busqueda=2),
+        )
+
+        uso_busqueda = proveedor_anthropic._extraer_uso_busqueda_web(respuesta)
+
+        self.assertEqual(uso_busqueda.busquedas_exitosas, 1)
+        self.assertEqual(uso_busqueda.busquedas_con_error, 1)
+        self.assertEqual(uso_busqueda.codigos_error, ["query_too_long"])
+
+        # Solo se cobra 1 búsqueda (la exitosa), no las 2 reportadas.
+        tarifa = costos.obtener_tarifa("claude-sonnet-5")
+        costo = costos.calcular_costos(UsoTokens(), uso_busqueda, tarifa)
+        self.assertEqual(costo.busqueda_web, Decimal("0.01"))
+
+    # 8: max_uses_exceeded conserva las métricas disponibles.
+    def test_max_uses_exceeded_conserva_metricas_disponibles(self):
+        uso = _uso_de_prueba(entrada=800, salida=50, solicitudes_busqueda=1)
+        contenido = [_bloque_busqueda_con_error("max_uses_exceeded"), SimpleNamespace(type="text", text="{}")]
+        respuesta = SimpleNamespace(content=contenido, usage=uso, model="claude-sonnet-5", stop_reason="tool_use")
+
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(respuesta)
+
+        metricas = ctx.exception.metricas
+        self.assertIsNotNone(metricas)
+        self.assertEqual(metricas.resultado, "ERROR")
+        self.assertEqual(metricas.fase_error, "VALIDACION_BUSQUEDA_WEB")
+        self.assertEqual(metricas.codigo_error, "max_uses_exceeded")
+        self.assertEqual(metricas.llamadas_logicas_api, 1)
+        # El uso ya reportado por la API se conserva pese al error.
+        self.assertEqual(metricas.tokens.entrada, 800)
+        self.assertEqual(metricas.tokens.salida, 50)
+        self.assertEqual(metricas.busqueda_web.busquedas_con_error, 1)
+
+    def test_otro_error_de_busqueda_web_conserva_metricas(self):
+        uso = _uso_de_prueba()
+        contenido = [_bloque_busqueda_con_error("query_too_long"), SimpleNamespace(type="text", text="{}")]
+        respuesta = SimpleNamespace(content=contenido, usage=uso, model="claude-sonnet-5", stop_reason="tool_use")
+
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(respuesta)
+
+        metricas = ctx.exception.metricas
+        self.assertEqual(metricas.fase_error, "VALIDACION_BUSQUEDA_WEB")
+        self.assertEqual(metricas.codigo_error, "query_too_long")
+
+    # 5: respuesta JSON inválida.
+    def test_json_invalido_conserva_metricas(self):
+        uso = _uso_de_prueba(entrada=10, salida=5)
+        respuesta = SimpleNamespace(
+            content=[SimpleNamespace(type="text", text="esto no es JSON {{{")],
+            usage=uso, model="claude-sonnet-5", stop_reason="end_turn",
+        )
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(respuesta)
+        metricas = ctx.exception.metricas
+        self.assertEqual(metricas.fase_error, "PARSEO_JSON")
+        self.assertEqual(metricas.tokens.entrada, 10)
+        self.assertEqual(metricas.tokens.salida, 5)
+
+    # 5 (bis): respuesta estructurada inválida (falta una clave obligatoria).
+    def test_respuesta_estructurada_invalida_conserva_metricas(self):
+        datos = _datos_respuesta_valida()
+        del datos["nivel_confianza"]
+        uso = _uso_de_prueba()
+        respuesta = SimpleNamespace(
+            content=[SimpleNamespace(type="text", text=json.dumps(datos))],
+            usage=uso, model="claude-sonnet-5", stop_reason="end_turn",
+        )
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(respuesta)
+        metricas = ctx.exception.metricas
+        self.assertEqual(metricas.fase_error, "VALIDACION_ESTRUCTURA")
+
+    # 6: respuesta vacía.
+    def test_respuesta_vacia_conserva_metricas(self):
+        respuesta = SimpleNamespace(
+            content=[SimpleNamespace(type="text", text="   ")],
+            usage=_uso_de_prueba(), model="claude-sonnet-5", stop_reason="end_turn",
+        )
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            self._investigar_con_respuesta(respuesta)
+        metricas = ctx.exception.metricas
+        self.assertEqual(metricas.fase_error, "RESPUESTA_VACIA")
+        self.assertEqual(metricas.resultado, "ERROR")
+
+    # 7: error HTTP con información disponible (status_code presente).
+    def test_error_http_con_codigo_disponible(self):
+        excepcion = _error_http(anthropic.AuthenticationError, 401, "invalid x-api-key")
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.side_effect = excepcion
+            with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        metricas = ctx.exception.metricas
+        self.assertEqual(metricas.fase_error, "LLAMADA_HTTP")
+        self.assertEqual(metricas.codigo_error, "401")
+        self.assertEqual(metricas.llamadas_logicas_api, 1)
+        self.assertIsNone(metricas.tokens.entrada)
+        self.assertFalse(metricas.costos_usd.costo_completo)
+
+    # 8: error HTTP sin ninguna información disponible (sin status_code).
+    def test_error_http_sin_informacion_disponible(self):
+        request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+        excepcion = anthropic.APIConnectionError(request=request)
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.side_effect = excepcion
+            with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        metricas = ctx.exception.metricas
+        self.assertEqual(metricas.fase_error, "LLAMADA_HTTP")
+        self.assertIsNone(metricas.codigo_error)
+        self.assertEqual(metricas.llamadas_logicas_api, 1)
+
+    # 9: error antes de llamar a la API (falta ANTHROPIC_API_KEY) -> 0 llamadas.
+    def test_falta_api_key_registra_cero_llamadas_y_costo_cero(self):
+        os.environ.pop("ANTHROPIC_API_KEY", None)
+        with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        metricas = ctx.exception.metricas
+        self.assertIsNotNone(metricas)
+        self.assertEqual(metricas.fase_error, "ANTES_DE_LLAMAR")
+        self.assertEqual(metricas.llamadas_logicas_api, 0)
+        self.assertEqual(metricas.costos_usd.total_estimado, Decimal("0"))
+        self.assertTrue(metricas.costos_usd.costo_completo)
+        self.assertEqual(metricas.tokens.entrada, 0)
+
+    # 9 (bis): error antes de llamar por Prompt Maestro faltante.
+    def test_prompt_faltante_registra_cero_llamadas(self):
+        from motor_investigacion.prompts import PromptNoEncontradoError
+
+        with mock.patch(
+            "motor_investigacion.proveedor_anthropic.cargar_prompt",
+            side_effect=PromptNoEncontradoError("no se encontró el prompt"),
+        ):
+            with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        metricas = ctx.exception.metricas
+        self.assertEqual(metricas.fase_error, "ANTES_DE_LLAMAR")
+        self.assertEqual(metricas.llamadas_logicas_api, 0)
+
+    def test_la_api_key_nunca_aparece_en_las_metricas(self):
+        clave_secreta = "sk-ant-clave-secreta-de-prueba-98765"
+        os.environ["ANTHROPIC_API_KEY"] = clave_secreta
+        excepcion = _error_http(anthropic.AuthenticationError, 401, "invalid x-api-key")
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.side_effect = excepcion
+            with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        metricas_json = json.dumps(ctx.exception.metricas.a_diccionario_json())
+        self.assertNotIn(clave_secreta, metricas_json)
+
+    def test_ninguna_prueba_de_telemetria_alcanza_la_red_real(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_exitosa_con_uso()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        ClienteFalso.assert_called_once()
 
 
 if __name__ == "__main__":

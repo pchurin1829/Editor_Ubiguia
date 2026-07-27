@@ -9,7 +9,7 @@ from pathlib import Path
 
 from motor_investigacion import estados
 from motor_investigacion.entidades.poi import adaptador as adaptador_poi
-from motor_investigacion.proveedor import ProveedorInvestigacion
+from motor_investigacion.proveedor import ErrorProveedorInvestigacion, ProveedorInvestigacion
 
 
 def ejecutar_investigacion(poi_dir: Path, proveedor: ProveedorInvestigacion, actor: str = "agent") -> dict:
@@ -41,7 +41,19 @@ def ejecutar_investigacion(poi_dir: Path, proveedor: ProveedorInvestigacion, act
     )
     adaptador_poi.inicializar_observaciones(poi_dir)
 
-    resultado = proveedor.investigar_entidad(contexto)
+    try:
+        resultado = proveedor.investigar_entidad(contexto)
+    except ErrorProveedorInvestigacion as exc:
+        # La telemetría del intento fallido (si el proveedor pudo
+        # recopilarla) se persiste igual que la de un intento exitoso,
+        # para poder auditar el costo real incluso cuando la
+        # investigación no terminó en éxito.
+        if exc.metricas is not None:
+            adaptador_poi.registrar_metricas(poi_dir, exc.metricas)
+        raise
+
+    if resultado.metricas is not None:
+        adaptador_poi.registrar_metricas(poi_dir, resultado.metricas)
 
     adaptador_poi.escribir_borrador(poi_dir, resultado)
 

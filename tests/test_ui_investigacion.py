@@ -9,6 +9,7 @@ repositorio.
 
 Ejecutar con:  python -m unittest discover -s tests -v
 """
+import gc
 import json
 import os
 import sys
@@ -121,6 +122,13 @@ class PruebasUIInvestigacion(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls._raiz.destroy()
+        # Fuerza la recolección de los `tk.Variable` que quedaron sin
+        # referencias vivas de esta raíz ANTES de que la próxima clase
+        # cree la suya: si Python los recolecta más tarde (en un momento
+        # arbitrario mientras corre otra clase), su __del__ intenta tocar
+        # un intérprete Tcl ya destruido y puede desestabilizar la
+        # próxima raíz de la misma corrida de pruebas.
+        gc.collect()
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -223,6 +231,13 @@ class PruebasVentanaRevision(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls._raiz.destroy()
+        # Fuerza la recolección de los `tk.Variable` que quedaron sin
+        # referencias vivas de esta raíz ANTES de que la próxima clase
+        # cree la suya: si Python los recolecta más tarde (en un momento
+        # arbitrario mientras corre otra clase), su __del__ intenta tocar
+        # un intérprete Tcl ya destruido y puede desestabilizar la
+        # próxima raíz de la misma corrida de pruebas.
+        gc.collect()
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -333,6 +348,13 @@ class PruebasAprobarInvestigacion(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls._raiz.destroy()
+        # Fuerza la recolección de los `tk.Variable` que quedaron sin
+        # referencias vivas de esta raíz ANTES de que la próxima clase
+        # cree la suya: si Python los recolecta más tarde (en un momento
+        # arbitrario mientras corre otra clase), su __del__ intenta tocar
+        # un intérprete Tcl ya destruido y puede desestabilizar la
+        # próxima raíz de la misma corrida de pruebas.
+        gc.collect()
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
