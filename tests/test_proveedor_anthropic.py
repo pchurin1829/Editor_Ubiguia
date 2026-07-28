@@ -37,6 +37,11 @@ from motor_investigacion.entidad import (  # noqa: E402
 from motor_investigacion.proveedor import ProveedorInvestigacion  # noqa: E402
 from motor_investigacion.proveedor_anthropic import (  # noqa: E402
     DEFAULT_MODEL,
+    ESQUEMA_CONTRADICCION,
+    ESQUEMA_FUENTE,
+    ESQUEMA_RESPUESTA_ESTRUCTURADA,
+    MAX_TOKENS_RESPUESTA,
+    MAX_USOS_BUSQUEDA_WEB,
     ErrorProveedorAnthropic,
     ProveedorInvestigacionAnthropic,
 )
@@ -442,17 +447,19 @@ class PruebasBusquedaWeb(unittest.TestCase):
         _args, kwargs = ClienteFalso.return_value.messages.create.call_args
         self.assertEqual(
             kwargs["tools"],
-            [{"type": "web_search_20250305", "name": "web_search", "max_uses": 1}],
+            [{"type": "web_search_20250305", "name": "web_search", "max_uses": 3}],
         )
 
-    def test_la_busqueda_web_queda_limitada_a_un_solo_uso_en_el_paso_5a(self):
-        # Control de costo previo a la primera validación real: como
-        # mucho una búsqueda web por llamada.
+    def test_la_busqueda_web_queda_limitada_a_tres_usos(self):
+        # Paso 5A.2: subido de 1 a 3 tras comprobar en la validación real
+        # que una sola búsqueda agota el límite (max_uses_exceeded) antes
+        # de completar la investigación.
         with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
             ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
         _args, kwargs = ClienteFalso.return_value.messages.create.call_args
-        self.assertEqual(kwargs["tools"][0]["max_uses"], 1)
+        self.assertEqual(kwargs["tools"][0]["max_uses"], 3)
+        self.assertEqual(kwargs["tools"][0]["max_uses"], MAX_USOS_BUSQUEDA_WEB)
 
     def test_procesa_correctamente_una_respuesta_con_resultados_de_busqueda_real(self):
         datos = _datos_respuesta_valida()
@@ -942,6 +949,185 @@ class PruebasTelemetria(unittest.TestCase):
             ClienteFalso.return_value.messages.create.return_value = _respuesta_exitosa_con_uso()
             ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
         ClienteFalso.assert_called_once()
+
+
+def _objetos_del_esquema(esquema):
+    """Recorre recursivamente un JSON Schema (dict) y devuelve todos los
+    sub-esquemas de tipo "object" que encuentra, incluyendo los anidados
+    dentro de "properties" y "items". Usado para verificar que TODOS los
+    objetos del esquema (no solo el de nivel superior) declaran
+    additionalProperties=False y required completo."""
+    objetos = []
+    if not isinstance(esquema, dict):
+        return objetos
+    if esquema.get("type") == "object":
+        objetos.append(esquema)
+    for propiedad in esquema.get("properties", {}).values():
+        objetos.extend(_objetos_del_esquema(propiedad))
+    if "items" in esquema:
+        objetos.extend(_objetos_del_esquema(esquema["items"]))
+    return objetos
+
+
+class PruebasStructuredOutputs(unittest.TestCase):
+    """Corrección del fallo real del intento 5 (stop_reason=end_turn pero
+    JSON inválido): en vez de depender únicamente de instrucciones
+    textuales para "producir JSON válido", la llamada usa
+    output_config.format (Structured Outputs de la API de Anthropic) con
+    un esquema que representa exactamente el contrato que
+    _resultado_desde_respuesta() espera. Ninguna prueba de esta clase
+    llama a la API real: el cliente de Anthropic queda mockeado."""
+
+    def setUp(self):
+        self._entorno_previo = dict(os.environ)
+        self.addCleanup(lambda: (os.environ.clear(), os.environ.update(self._entorno_previo)))
+        os.environ["ANTHROPIC_API_KEY"] = "clave-de-prueba"
+
+    # 1: messages.create recibe output_config.format.
+    def test_messages_create_recibe_output_config_format(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+
+        _args, kwargs = ClienteFalso.return_value.messages.create.call_args
+        self.assertIn("output_config", kwargs)
+        self.assertEqual(kwargs["output_config"]["format"]["type"], "json_schema")
+        self.assertEqual(kwargs["output_config"]["format"]["schema"], ESQUEMA_RESPUESTA_ESTRUCTURADA)
+
+    # 2: el esquema incluye todos los campos obligatorios del contrato
+    # actual (los mismos que exige _validar_respuesta_estructurada()).
+    def test_el_esquema_incluye_todos_los_campos_obligatorios(self):
+        self.assertEqual(
+            set(ESQUEMA_RESPUESTA_ESTRUCTURADA["required"]),
+            {"borrador_markdown", "fuentes", "contradicciones", "observaciones", "nivel_confianza"},
+        )
+        self.assertEqual(
+            set(ESQUEMA_FUENTE["required"]),
+            {
+                "titulo",
+                "url",
+                "sitio",
+                "consultado_en",
+                "secciones_respaldadas",
+                "confianza",
+                "notas",
+                "identificador",
+            },
+        )
+        self.assertEqual(set(ESQUEMA_CONTRADICCION["required"]), {"topic", "sources", "detail"})
+        self.assertEqual(
+            ESQUEMA_RESPUESTA_ESTRUCTURADA["properties"]["nivel_confianza"]["enum"], ["ALTO", "MEDIO", "BAJO"]
+        )
+
+    # 3: additionalProperties es false en TODOS los objetos del esquema
+    # (nivel superior y los anidados en fuentes/contradicciones).
+    def test_additionalProperties_false_en_todos_los_objetos_del_esquema(self):
+        objetos = _objetos_del_esquema(ESQUEMA_RESPUESTA_ESTRUCTURADA)
+        # Nivel superior + fuente + contradicción: al menos estos tres.
+        self.assertGreaterEqual(len(objetos), 3)
+        for objeto in objetos:
+            with self.subTest(propiedades=list(objeto.get("properties", {}))):
+                self.assertIs(objeto.get("additionalProperties"), False)
+                self.assertEqual(set(objeto.get("required", [])), set(objeto.get("properties", {})))
+
+    # 4: una respuesta válida se sigue convirtiendo correctamente en
+    # ResultadoInvestigacion con output_config ya presente en la llamada.
+    def test_respuesta_valida_se_convierte_en_resultado_investigacion(self):
+        datos = _datos_respuesta_valida()
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa(json.dumps(datos))
+            resultado = ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertEqual(resultado.borrador_master, datos["borrador_markdown"])
+        self.assertEqual(resultado.nivel_confianza, datos["nivel_confianza"])
+        self.assertEqual(len(resultado.fuentes), 1)
+
+    # 5: el Markdown extenso dentro de borrador_master conserva comillas,
+    # saltos de línea y caracteres especiales al ir y volver por JSON.
+    def test_borrador_markdown_conserva_caracteres_especiales(self):
+        borrador_con_caracteres_especiales = (
+            "# Casa Curutchet\n\n"
+            + "\n\n".join(
+                f'## {n}. Sección {n}\n\nTexto con "comillas", saltos\nde línea, barras \\ y acentos: ó ñ á.'
+                for n in range(1, 14)
+            )
+        )
+        datos = _datos_respuesta_valida(borrador_markdown=borrador_con_caracteres_especiales)
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa(json.dumps(datos))
+            resultado = ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertEqual(resultado.borrador_master, borrador_con_caracteres_especiales)
+        self.assertIn('"comillas"', resultado.borrador_master)
+        self.assertIn("\n", resultado.borrador_master)
+        self.assertIn("\\", resultado.borrador_master)
+        self.assertIn("ó ñ á", resultado.borrador_master)
+
+    # 6: ya no se depende únicamente de la instrucción textual para
+    # garantizar JSON válido — se retiró la orden redundante del prompt.
+    def test_ya_no_depende_solo_de_la_instruccion_textual_para_json_valido(self):
+        self.assertNotIn(
+            "Respondé ÚNICAMENTE con un objeto JSON válido",
+            proveedor_anthropic._INSTRUCCION_FORMATO_RESPUESTA,
+        )
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        _args, kwargs = ClienteFalso.return_value.messages.create.call_args
+        self.assertIn("output_config", kwargs)
+
+    # 7: max_tokens sigue en 21000 (no se volvió a subir).
+    def test_max_tokens_continua_en_21000(self):
+        self.assertEqual(MAX_TOKENS_RESPUESTA, 21000)
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        _args, kwargs = ClienteFalso.return_value.messages.create.call_args
+        self.assertEqual(kwargs["max_tokens"], 21000)
+
+    # 8: max_uses sigue en 3 (cubierto también en PruebasBusquedaWeb;
+    # se repite acá como parte del combo de invariantes de esta corrección).
+    def test_max_uses_continua_en_3(self):
+        self.assertEqual(MAX_USOS_BUSQUEDA_WEB, 3)
+
+    # 9: max_retries sigue en 0.
+    def test_max_retries_continua_en_0(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        _args, kwargs = ClienteFalso.call_args
+        self.assertEqual(kwargs["max_retries"], 0)
+
+    # 10: solo existe una llamada lógica a messages.create.
+    def test_solo_una_llamada_logica_a_messages_create(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        ClienteFalso.return_value.messages.create.assert_called_once()
+
+    # 11: ninguna prueba de esta clase alcanza la red real.
+    def test_ninguna_prueba_alcanza_la_red_real(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_estructurada_valida()
+            ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        ClienteFalso.assert_called_once()
+
+    # 12: la telemetría sigue funcionando en éxito y en error, ahora con
+    # output_config ya presente en la llamada (no se rompió nada del
+    # mecanismo existente, ver también PruebasTelemetria).
+    def test_telemetria_sigue_funcionando_en_exito_con_output_config(self):
+        respuesta = _respuesta_exitosa_con_uso()
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = respuesta
+            resultado = ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertEqual(resultado.metricas.resultado, "OK")
+        self.assertEqual(resultado.metricas.llamadas_logicas_api, 1)
+
+    def test_telemetria_sigue_funcionando_en_error_con_output_config(self):
+        with mock.patch("motor_investigacion.proveedor_anthropic.anthropic.Anthropic") as ClienteFalso:
+            ClienteFalso.return_value.messages.create.return_value = _respuesta_falsa("no es JSON {{{")
+            with self.assertRaises(ErrorProveedorAnthropic) as ctx:
+                ProveedorInvestigacionAnthropic().investigar_entidad(_contexto_de_prueba())
+        self.assertEqual(ctx.exception.metricas.resultado, "ERROR")
+        self.assertEqual(ctx.exception.metricas.fase_error, "PARSEO_JSON")
 
 
 if __name__ == "__main__":

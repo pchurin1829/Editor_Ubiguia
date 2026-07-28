@@ -29,7 +29,14 @@ interpretar el resto de la respuesta.
 
 Paso 5A.2: primera validación real controlada por costo — modelo
 `claude-sonnet-5`, `max_retries=0` (sin reintentos automáticos del SDK)
-y `MAX_USOS_BUSQUEDA_WEB=1` (como mucho una búsqueda por investigación).
+y `MAX_USOS_BUSQUEDA_WEB=3` (como mucho tres búsquedas por investigación;
+subido desde 1 tras comprobar que una sola búsqueda agota el límite con
+`max_uses_exceeded` antes de completar la investigación). `thinking`
+queda deshabilitado explícitamente: `claude-sonnet-5` usa thinking
+adaptativo por defecto, y en las primeras validaciones reales ese
+thinking consumía casi todo `MAX_TOKENS_RESPUESTA` (la salida escalaba
+casi 1:1 con el límite) sin dejar espacio para completar el JSON de
+respuesta, cortando siempre en `stop_reason=max_tokens`.
 
 Telemetría y costos: cada llamada a investigar_entidad() recopila una
 MetricasInvestigacion (ver entidad.py) — duración, llamadas lógicas,
@@ -94,8 +101,16 @@ DEFAULT_MODEL = "claude-sonnet-5"
 
 # El borrador estructurado (13 secciones + fuentes + control de calidad)
 # es sustancialmente más largo que la respuesta de prueba de etapas
-# anteriores.
-MAX_TOKENS_RESPUESTA = 4096
+# anteriores. 4096, 8192 y 16000 resultaron insuficientes en la validación
+# real (Paso 5A.2): la respuesta cortó siempre en stop_reason=max_tokens,
+# con la salida pegada al límite en cada intento (4250, 8578 y 16333
+# tokens) — incluso con thinking deshabilitado. 21000 es el máximo que
+# admite el SDK sin pasar a streaming para este modelo (por encima de
+# ~21500 el SDK exige streaming por riesgo de timeout HTTP en una
+# respuesta no streameada tan larga); se usa ese tope para no cambiar el
+# mecanismo de la llamada (create() síncrono) que asumen las pruebas
+# existentes.
+MAX_TOKENS_RESPUESTA = 21000
 
 # Nombre del archivo de prompt en Docs/prompts/. No hay ningún prompt
 # de respaldo interno: si el archivo no existe, cargar_prompt() lanza
@@ -116,10 +131,69 @@ CANTIDAD_SECCIONES_OBLIGATORIAS = 13
 TIPO_HERRAMIENTA_BUSQUEDA_WEB = "web_search_20250305"
 NOMBRE_HERRAMIENTA_BUSQUEDA_WEB = "web_search"
 
-# Paso 5A: primera validación real controlada, limitada a una sola
-# búsqueda web como máximo. Se reevaluará en el Paso 5B (investigación
-# completa) si corresponde aumentar este límite.
-MAX_USOS_BUSQUEDA_WEB = 1
+# Paso 5A.2: subido de 1 a 3 tras comprobar que una sola búsqueda agota
+# el límite (`max_uses_exceeded`) antes de completar la investigación.
+# Se reevaluará en el Paso 5B (investigación completa) si corresponde
+# aumentar este límite.
+MAX_USOS_BUSQUEDA_WEB = 3
+
+# Structured Outputs (output_config.format del SDK): esquema JSON que le
+# garantiza a la API la forma exacta que espera _resultado_desde_respuesta(),
+# en vez de depender únicamente de instrucciones textuales para "producir
+# JSON válido" (mecanismo que en la validación real terminó devolviendo un
+# JSON inválido pese a stop_reason=end_turn). Los campos de cada fuente
+# se declaran como string simple (no nullable): cuando el dato no está
+# disponible, el contrato ya espera cadena vacía, no `null` — un valor
+# `null` ahí rompería _fuente_desde_diccionario(), que hace str(...) sobre
+# cada campo.
+ESQUEMA_FUENTE = {
+    "type": "object",
+    "properties": {
+        "titulo": {"type": "string"},
+        "url": {"type": "string"},
+        "sitio": {"type": "string"},
+        "consultado_en": {"type": "string"},
+        "secciones_respaldadas": {"type": "array", "items": {"type": "string"}},
+        "confianza": {"type": "string"},
+        "notas": {"type": "string"},
+        "identificador": {"type": "string"},
+    },
+    "required": [
+        "titulo",
+        "url",
+        "sitio",
+        "consultado_en",
+        "secciones_respaldadas",
+        "confianza",
+        "notas",
+        "identificador",
+    ],
+    "additionalProperties": False,
+}
+
+ESQUEMA_CONTRADICCION = {
+    "type": "object",
+    "properties": {
+        "topic": {"type": "string"},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "detail": {"type": "string"},
+    },
+    "required": ["topic", "sources", "detail"],
+    "additionalProperties": False,
+}
+
+ESQUEMA_RESPUESTA_ESTRUCTURADA = {
+    "type": "object",
+    "properties": {
+        "borrador_markdown": {"type": "string"},
+        "fuentes": {"type": "array", "items": ESQUEMA_FUENTE},
+        "contradicciones": {"type": "array", "items": ESQUEMA_CONTRADICCION},
+        "observaciones": {"type": "string"},
+        "nivel_confianza": {"type": "string", "enum": list(NIVELES_CONFIANZA_VALIDOS)},
+    },
+    "required": ["borrador_markdown", "fuentes", "contradicciones", "observaciones", "nivel_confianza"],
+    "additionalProperties": False,
+}
 
 # Fases posibles de MetricasInvestigacion.fase_error para este proveedor.
 FASE_ANTES_DE_LLAMAR = "ANTES_DE_LLAMAR"
@@ -131,14 +205,19 @@ FASE_VALIDACION_ESTRUCTURA = "VALIDACION_ESTRUCTURA"
 
 # Instrucción técnica de formato de respuesta. No redefine la estructura
 # editorial del Prompt Maestro (esa la define exclusivamente el propio
-# Prompt Maestro): solo indica el sobre JSON en el que debe viajar.
+# Prompt Maestro): solo describe el contenido de cada clave del sobre
+# JSON. La validez estructural del JSON en sí (que sea JSON, que tenga
+# exactamente estas claves) ya no depende de esta instrucción textual:
+# la garantiza output_config.format (ESQUEMA_RESPUESTA_ESTRUCTURADA) a
+# nivel de API, así que se retiró la orden redundante de "respondé
+# ÚNICAMENTE con un objeto JSON válido, sin texto antes ni después".
 _INSTRUCCION_FORMATO_RESPUESTA = """
 
 ---
 
 Formato de la respuesta (obligatorio):
 
-Respondé ÚNICAMENTE con un objeto JSON válido, sin texto antes ni después, con exactamente estas claves:
+La respuesta debe tener estas claves:
 
 - "borrador_markdown": el POI_MASTER_BORRADOR.md completo en Markdown, siguiendo la estructura obligatoria definida en este Prompt Maestro.
 - "fuentes": lista de objetos; cada uno con las claves "titulo", "url", "sitio", "consultado_en", "secciones_respaldadas" (lista), "confianza", "notas" e "identificador", cuando estén disponibles.
@@ -455,6 +534,8 @@ class ProveedorInvestigacionAnthropic(ProveedorInvestigacion):
             respuesta = cliente.messages.create(
                 model=self.modelo,
                 max_tokens=MAX_TOKENS_RESPUESTA,
+                thinking={"type": "disabled"},
+                output_config={"format": {"type": "json_schema", "schema": ESQUEMA_RESPUESTA_ESTRUCTURADA}},
                 messages=[{"role": "user", "content": prompt}],
                 tools=[
                     {
