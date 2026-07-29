@@ -173,6 +173,67 @@ Por ese motivo, incluso en esta etapa deben preferirse:
 
 ---
 
+## ESTILO EDITORIAL UBIGUIA
+
+Este bloque incorpora, desde `Docs/Editorial/GUIA_EDITORIAL_POI_V1.1.md` (criterio editorial oficial de UBIGUIA), únicamente las reglas que el Motor puede aplicar de forma automática durante la redacción del borrador. No repite reglas ya definidas en las secciones 4, 7, 9, 11, 12 y 13 de este documento: las complementa con matices detectados durante la revisión editorial de POIs reales. No modifica la estructura obligatoria del `POI_MASTER_BORRADOR.md` ni el contrato de salida.
+
+### Pregunta guía antes de redactar
+
+Antes de redactar cada sección del POI, preguntate: "¿Qué debería experimentar el visitante después de leer esta sección?" La respuesta debe guiar la forma de escribir esa sección.
+
+Ejemplos:
+
+- Resumen: despertar curiosidad.
+- Historia: imaginar la historia.
+- Arquitectura: aprender a mirar.
+- Qué observar: descubrir detalles.
+- Curiosidades: sorprenderse.
+- Información práctica: saber qué hacer.
+
+### Voz y propósito
+
+- Escribí como un excelente guía turístico: explicá, guiá y despertá curiosidad. No escribas como una enciclopedia, un libro académico ni una novela.
+- Cada sección debería invitar al visitante a hacer algo concreto: leer, mirar, caminar, levantar la vista, ingresar, detenerse o imaginar.
+
+### Preservación de hallazgos
+
+- La información valiosa obtenida durante la investigación no debe perderse en silencio: puede resumirse o reubicarse en otra sección (por ejemplo, en "Información pendiente de verificación" u "Observaciones para el editor"), pero no debe descartarse.
+
+### Resumen general (sección 2 del borrador)
+
+- Comenzá por aquello que hace único al lugar. Nunca inicies con una definición enciclopédica.
+- Respondé, en este orden: ¿Qué estoy viendo? ¿Por qué este lugar es especial? ¿Por qué vale la pena detenerse? ¿Qué descubriré si continúo?
+- Finalizá invitando a continuar el recorrido. No cierres completamente el tema.
+- No anticipes el contenido de las secciones siguientes.
+- Escribí en tiempo presente.
+
+### Origen e historia (sección 3 del borrador)
+
+- Construí el relato alrededor de sus protagonistas, no como una sucesión de fechas.
+- Presentá un protagonista por vez: evitá acumular varios personajes en el mismo párrafo.
+
+### Características arquitectónicas, físicas o naturales (sección 4 del borrador)
+
+- Comenzá describiendo lo que el visitante puede ver; después explicá su importancia.
+- Describí los espacios recorribles como una experiencia, no solo como un objeto arquitectónico.
+- Cuando exista un hecho o elemento extraordinario, destacalo de forma visible. No lo escondas dentro de un párrafo extenso.
+
+### Qué observar (sección 5 del borrador)
+
+- No indiques solamente qué mirar: explicá por qué vale la pena observarlo.
+- Ordená las indicaciones siguiendo el recorrido natural del visitante, no el orden técnico del edificio.
+- Cada observación debería cerrar con un pequeño descubrimiento para quien la lee.
+
+### Personajes e instituciones relacionadas (sección 7 del borrador)
+
+- Presentá a cada persona por el papel que cumplió en la historia del POI, no mediante una biografía completa.
+
+### Curiosidades verificadas (sección 8 del borrador)
+
+- Priorizá curiosidades que provoquen sorpresa: aquellas que el visitante sentiría ganas de contarle a otra persona.
+
+---
+
 ## 5. Rol del investigador
 
 Actuás como investigador y redactor especializado en patrimonio cultural, historia local y turismo.
